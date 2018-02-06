@@ -1,0 +1,194 @@
+import pymysql
+import time
+import datetime
+import sys
+import json
+
+class DBMySQL:
+    def __init__(self, ip, usr, pwd, db):
+        self.db = pymysql.connect(ip,usr,pwd,db)
+        self.cursor = self.db.cursor()
+
+
+    def db_set(self, sql):
+        try:
+            # Execute the SQL command
+            self.cursor.execute(sql)
+            # Commit your changes in the database
+            self.db.commit()
+        except:
+            # Rollback in case there is any error
+            print("Exception error: {0}".format(sys.exc_info()[0]))
+            self.db.rollback()
+
+
+    def db_get(self, sql):
+        try:
+            # Execute the SQL command
+            self.cursor.execute(sql)
+            return self.cursor.fetchall()
+        except:
+            # Rollback in case there is any error
+            print("Exception error: {0}".format(sys.exc_info()[0]))
+
+
+##############################################################
+
+
+    def get_users(self):
+        userlist = []
+        sql = "SELECT * FROM user"
+        usertup = self.db_get(sql)
+        for user in usertup:
+            userlist.append({'user': user[0]})
+        return userlist
+
+
+    def get_user(self, user):
+        uservalues = []
+        sql = "SELECT * FROM user WHERE user = '%s'" % user
+        usertup = self.db_get(sql)
+        if len(usertup):
+            usertup = usertup[0]
+            uservalues.append({'user': usertup[0], 'name': usertup[1], 'password': usertup[2]})
+        return uservalues
+
+
+    def check_user(self, user):
+        if self.get_user(user):
+            return True
+        else:
+            return False
+
+
+    def add_user(self, obj):
+        # obj expected dictionary {user: 'user', name: 'name', password: 'password}
+        sql = \
+              "INSERT INTO user(user,name,password,created,updated) \
+VALUES ('%s','%s','%s',null,null) ON DUPLICATE KEY UPDATE \
+name='%s',password='%s',created=null,updated=null" % \
+(obj['user'], obj['name'], obj['password'], obj['name'], obj['password'])
+        self.db_set(sql)
+
+
+    def del_user(self, user):
+        sql = "DELETE FROM user WHERE user='%s'" % user
+        self.db_set(sql)
+
+
+###############################################################
+
+
+    def get_boards(self):
+        boardlist = []
+        sql = "SELECT * FROM board"
+        boardtup = self.db_get(sql)
+        for board in boardtup:
+            boardlist.append({'boardid': board[0]})
+        return boardlist
+
+
+    def add_board(self, obj):
+        # obj expected dictionary {user: 'user', name: 'name'}
+        sql = \
+              "INSERT INTO board(user,name,created,updated) \
+VALUES ('%s','%s',null,null) ON DUPLICATE KEY UPDATE \
+user='%s',name='%s',created=null,updated=null" % \
+(obj['user'], obj['name'], obj['user'], obj['name'])
+        self.db_set(sql)
+
+    def update_board(self, obj):
+        # obj expected dictionary {boardid: 'boardid', user: 'user', name: 'name'}
+        sql = \
+            "INSERT INTO board(boardid,user,name,created,updated) \
+VALUES ('%s','%s','%s',null,null) ON DUPLICATE KEY UPDATE \
+user='%s',name='%s',created=null,updated=null" % \
+(obj['boardid'],obj['user'], obj['name'], obj['user'], obj['name'])
+        self.db_set(sql)
+
+
+    def get_board(self, boardid):
+        boardvalues = []
+        sql = "SELECT * FROM board WHERE boardid = '%s'" % boardid
+        boardtup = self.db_get(sql)
+        if len(boardtup):
+            boardtup = boardtup[0]
+            boardvalues.append({'boardid': boardtup[0], 'name': boardtup[1], 'user': boardtup[2]})
+        return boardvalues
+
+
+    def check_board(self, boardid):
+        if self.get_board(boardid):
+            return True
+        else:
+            return False
+
+
+    def del_board(self, boardid):
+        sql = "DELETE FROM board WHERE boardid = '%s'" % boardid
+        self.db_set(sql)
+
+
+################################################################
+
+
+    def get_topics(self, boardid):
+        topiclist = []
+        sql = "SELECT * FROM topic WHERE boardid = '%s'" % boardid
+        topictup = self.db_get(sql)
+        for topic in topictup:
+            topiclist.append({'topicid': topic[0]})
+        return topiclist
+
+
+    def add_topic(self, obj):
+        sql = \
+            "INSERT INTO topic(boardid,heading,description,created,updated) \
+VALUES ('%s','%s','%s',null,null) ON DUPLICATE KEY UPDATE \
+heading='%s',description='%s',created=null,updated=null" % \
+            (obj['boardid'], obj['heading'], obj['description'], obj['heading'], obj['description'])
+        self.db_set(sql)
+
+
+    def update_topic(self, obj):
+        sql = \
+            "INSERT INTO topic(topicid,boardid,heading,description,created,updated) \
+VALUES ('%s','%s','%s','%s',null,null) ON DUPLICATE KEY UPDATE \
+heading='%s',description='%s',created=null,updated=null" % \
+            (obj['topicid'], obj['boardid'], obj['heading'], obj['description'], obj['heading'], obj['description'])
+        self.db_set(sql)
+
+
+    def get_topic(self, topicid):
+        topicvalues = []
+        sql = "SELECT * FROM topic WHERE topicid = '%s'" % topicid
+        topictup = self.db_get(sql)
+        if len(topictup):
+            topictup = topictup[0]
+            topicvalues.append({'heading': topictup[2], 'description': topictup[3]})
+        return topicvalues
+
+
+    def check_topic(self, topicid):
+        if self.get_topic(topicid):
+            return True
+        else:
+            return False
+
+
+    def del_topic(self, topicid):
+        sql = "DELETE FROM topic WHERE topicid = '%s'" % topicid
+        self.db_set(sql)
+
+
+###################################################################
+
+
+    def get_votes(self,boardid,topicid):
+        votelist = []
+        sql = "SELECT * FROM votes WHERE topicid = '%s'" % topicid
+        votetup = self.db_get(sql)
+        for vote in votetup:
+            votelist.append({'voteid': vote[0]})
+        return votelist
+

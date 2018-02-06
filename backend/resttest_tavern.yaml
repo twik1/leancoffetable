@@ -1,0 +1,328 @@
+test_name: Rest API LCT tests
+
+stages:
+  - name: List all users
+    request:
+      url: http://localhost:5000/lct/api/v1.0/users
+      method: GET
+    response:
+      status_code: 200
+      body:
+        {}
+      headers:
+        content-type: application/json
+
+  - name: List nonexisting user
+    request:
+      url: http://localhost:5000/lct/api/v1.0/users/1
+      method: GET
+    response:
+      status_code: 404
+      headers:
+        content-type: application/json
+
+  - name: Add user
+    request:
+      url: http://localhost:5000/lct/api/v1.0/users
+      json:
+        user: jdoe1
+        password: good-password
+        name: John Doe
+      method: POST
+      headers:
+        content-type: application/json
+    response:
+      status_code: 201
+      headers:
+        content-type: application/json
+
+  - name: List existing user
+    request:
+      url: http://localhost:5000/lct/api/v1.0/users/jdoe1
+      method: GET
+    response:
+      status_code: 200
+      headers:
+        content-type: application/json
+
+  - name: List all users, one user
+    request:
+      url: http://localhost:5000/lct/api/v1.0/users
+      method: GET
+    response:
+      status_code: 200
+      body:
+        {}
+      headers:
+        content-type: application/json
+
+  - name: Add second user
+    request:
+      url: http://localhost:5000/lct/api/v1.0/users
+      json:
+        user: jdoe2
+        password: better-password
+        name: Jane Doe
+      method: POST
+      headers:
+        content-type: application/json
+    response:
+      status_code: 201
+      headers:
+        content-type: application/json
+
+  - name: List existing user again
+    request:
+      url: http://localhost:5000/lct/api/v1.0/users/jdoe1
+      method: GET
+    response:
+      status_code: 200
+      headers:
+        content-type: application/json
+
+  - name: Del nonexisting user
+    request:
+      url: http://localhost:5000/lct/api/v1.0/users/jdoe3
+      method: DELETE
+      headers:
+        content-type: application/json
+    response:
+      status_code: 404
+      headers:
+        content-type: application/json
+
+  - name: Del existing user
+    request:
+      url: http://localhost:5000/lct/api/v1.0/users/jdoe2
+      method: DELETE
+      headers:
+        content-type: application/json
+    response:
+      status_code: 201
+      headers:
+        content-type: application/json
+
+  - name: Update user
+    request:
+      url: http://localhost:5000/lct/api/v1.0/users/jdoe1
+      json:
+        user: jdoe1
+        password: perfect-password
+        name: Johnny Doe
+      method: PUT
+      headers:
+        content-type: application/json
+    response:
+      status_code: 201
+      headers:
+        content-type: application/json
+
+  - name: List all boards
+    request:
+      url: http://localhost:5000/lct/api/v1.0/boards
+      method: GET
+    response:
+      status_code: 200
+      body:
+        {}
+      headers:
+        content-type: application/json
+
+  - name: List nonexisting board
+    request:
+      url: http://localhost:5000/lct/api/v1.0/boards/4
+      method: GET
+    response:
+      status_code: 404
+      headers:
+        content-type: application/json
+
+  - name: Add board
+    request:
+      url: http://localhost:5000/lct/api/v1.0/boards
+      json:
+        name: Lean coffee table event
+        user: jdoe1
+      method: POST
+      headers:
+        content-type: application/json
+    response:
+      status_code: 201
+      headers:
+        content-type: application/json
+
+  - name: List all boards, one board
+    request:
+      url: http://localhost:5000/lct/api/v1.0/boards
+      method: GET
+    response:
+      status_code: 200
+      body:
+        {}
+      headers:
+        content-type: application/json
+
+  - name: Add second board
+    request:
+      url: http://localhost:5000/lct/api/v1.0/boards
+      json:
+        user: jdoe1
+        name: Next lean coffee event
+      method: POST
+      headers:
+        content-type: application/json
+    response:
+      status_code: 201
+      headers:
+        content-type: application/json
+
+  - name: List existing board
+    request:
+      url: http://localhost:5000/lct/api/v1.0/boards/1
+      method: GET
+    response:
+      status_code: 200
+      headers:
+        content-type: application/json
+
+  - name: Del nonexisting board
+    request:
+      url: http://localhost:5000/lct/api/v1.0/boards/10
+      method: DELETE
+      headers:
+        content-type: application/json
+    response:
+      status_code: 404
+      headers:
+        content-type: application/json
+
+  - name: Del existing board
+    request:
+      url: http://localhost:5000/lct/api/v1.0/boards/2
+      method: DELETE
+      headers:
+        content-type: application/json
+    response:
+      status_code: 201
+      headers:
+        content-type: application/json
+
+  - name: Update board
+    request:
+      url: http://localhost:5000/lct/api/v1.0/boards/1
+      json:
+        user: jdoe1
+        name:
+      method: PUT
+      headers:
+        content-type: application/json
+    response:
+      status_code: 201
+      headers:
+        content-type: application/json
+
+  - name: List all topics
+    request:
+      url: http://localhost:5000/lct/api/v1.0/boards/1/topics
+      method: GET
+    response:
+      status_code: 200
+      body:
+        {}
+      headers:
+        content-type: application/json
+
+  - name: List nonexisting topics
+    request:
+      url: http://localhost:5000/lct/api/v1.0/boards/1/topics/4
+      method: GET
+    response:
+      status_code: 404
+      headers:
+        content-type: application/json
+
+  - name: Add topic
+    request:
+      url: http://localhost:5000/lct/api/v1.0/boards/1/topics
+      json:
+        boardid: 1
+        heading: Very interesting topic
+        description: Bla bla bla bla bla blettan bla, blä, blu
+      method: POST
+      headers:
+        content-type: application/json
+    response:
+      status_code: 201
+      headers:
+        content-type: application/json
+
+  - name: List all topics, one topic
+    request:
+      url: http://localhost:5000/lct/api/v1.0/boards/1/topics
+      method: GET
+    response:
+      status_code: 200
+      body:
+        {}
+      headers:
+        content-type: application/json
+
+  - name: Add second topic
+    request:
+      url: http://localhost:5000/lct/api/v1.0/boards/1/topics
+      json:
+        heading: Even more interesting topic
+        description: Den här topicsn är sjukt intressant
+      method: POST
+      headers:
+        content-type: application/json
+    response:
+      status_code: 201
+      headers:
+        content-type: application/json
+
+  - name: List existing topic
+    request:
+      url: http://localhost:5000/lct/api/v1.0/boards/1/topics/1
+      method: GET
+    response:
+      status_code: 200
+      headers:
+        content-type: application/json
+
+  - name: Del nonexisting topic
+    request:
+      url: http://localhost:5000/lct/api/v1.0/boards/1/topics/76
+      method: DELETE
+      headers:
+        content-type: application/json
+    response:
+      status_code: 404
+      headers:
+        content-type: application/json
+
+  - name: Del existing topic
+    request:
+      url: http://localhost:5000/lct/api/v1.0/boards/1/topics/1
+      method: DELETE
+      headers:
+        content-type: application/json
+    response:
+      status_code: 201
+      headers:
+        content-type: application/json
+
+  - name: Update topic
+    request:
+      url: http://localhost:5000/lct/api/v1.0/boards/1/topics/2
+      json:
+        heading: Quite a dull topic
+        description: Den här topicen är sjukt tråkig
+      method: PUT
+      headers:
+        content-type: application/json
+    response:
+      status_code: 201
+      headers:
+        content-type: application/json
+
