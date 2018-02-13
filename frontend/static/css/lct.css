@@ -1,0 +1,36 @@
+  .navbar-brand {
+      font-family: 'Aldrich';
+        font-size: xx-large;
+        }
+        /**body {
+            margin-top: 30px;
+        }**/
+    .btn-primary:hover, .btn-primary:focus, .btn-primary:active, .btn-primary.active, .open>.dropdown-toggle.btn-primary {
+        color: #000000;
+        background-color: #FFFFFF;
+        border-color: #285e8e; /*set the color you want here*/
+        }
+    .btn-primary {
+        margin-left:0px;
+        font-size: large;
+        font-family: 'Roboto';
+        }
+    .btn-success {
+        margin: 10px;
+        }
+        
+    .navbar {
+        padding-top: 1px;
+        padding-bottom: 1px;
+    }
+    .card {
+        background-color: #3333;
+        padding: 3px;
+        margin: 8px;
+        }
+    .row{
+        margin-left: 0;
+        margin-right: 0;
+        }
+#boardinputform {margin-top: 30px;}
+/**.container { margin: 10px; }**/
