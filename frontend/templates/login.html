@@ -28,7 +28,11 @@
             <div class="collapse navbar-collapse" id="navbarColor01">
                 <ul class="navbar-nav ml-auto">
                     <a class="btn btn-primary" href="#">Home</a>
-                    <a class="btn btn-primary" href="#">Login</a>
+                    {% if param['loggedin'] == 'yes' %}
+                        <a class="btn btn-primary" href="#">Logout</a>
+                    {% else %}
+                        <a class="btn btn-primary" href="#">Login</a>
+                    {% endif %}
                     <a class="btn btn-primary" href="#">About</a>
                 </ul>
             </div>

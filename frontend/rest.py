@@ -43,5 +43,5 @@ class CurlREST:
         boardlist = []
         ids = self.get(self.baseurl+"boards")
         for id in ids:
-            board = self.get(self.baseurl+'boards/'+str(id['boardid']))
+            #board = self.get(self.baseurl+'boards/'+str(id['boardid']))
             print(board)
