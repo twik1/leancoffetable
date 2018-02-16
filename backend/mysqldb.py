@@ -89,21 +89,22 @@ name='%s',password='%s',created=null,updated=null" % \
 
 
     def add_board(self, obj):
-        # obj expected dictionary {user: 'user', name: 'name'}
+        # obj expected dictionary {username: 'username', boardname: 'boardname', startdate: 'startdate'}
         sql = \
-              "INSERT INTO board(user,name,created,updated) \
-VALUES ('%s','%s',null,null) ON DUPLICATE KEY UPDATE \
-user='%s',name='%s',created=null,updated=null" % \
-(obj['user'], obj['name'], obj['user'], obj['name'])
+              "INSERT INTO board(user,name,startdate,created,updated) \
+VALUES ('%s','%s','%s',null,null) ON DUPLICATE KEY UPDATE \
+user='%s',name='%s',startdate='%s', created=null,updated=null" % \
+(obj['username'], obj['boardname'], obj['startdate'],obj['username'], obj['boardname'],obj['startdate'])
+        print(sql)
         self.db_set(sql)
 
     def update_board(self, obj):
-        # obj expected dictionary {boardid: 'boardid', user: 'user', name: 'name'}
+        # obj expected dictionary {boardid: 'boardid', user: 'user', name: 'name', date:'date'}
         sql = \
-            "INSERT INTO board(boardid,user,name,created,updated) \
-VALUES ('%s','%s','%s',null,null) ON DUPLICATE KEY UPDATE \
-user='%s',name='%s',created=null,updated=null" % \
-(obj['boardid'],obj['user'], obj['name'], obj['user'], obj['name'])
+            "INSERT INTO board(boardid,user,name,startdate,created,updated) \
+VALUES ('%s','%s','%s','%s',null,null) ON DUPLICATE KEY UPDATE \
+user='%s',name='%s',startdate='%s',created=null,updated=null" % \
+(obj['boardid'],obj['user'], obj['name'], obj['startdate'], obj['user'], obj['name'],obj['startdate'])
         self.db_set(sql)
 
 

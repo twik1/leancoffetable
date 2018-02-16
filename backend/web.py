@@ -2,6 +2,8 @@
 from flask import Flask, abort, request, jsonify, make_response
 import mysqldb
 import json
+import datetime
+
 
 app = Flask(__name__)
 
@@ -14,6 +16,13 @@ def check_result(parameterlist):
         if not parameter in parameters:
             return False
     return True
+
+
+def conv_startdate(startdate):
+    date_processing = startdate.replace('T', '-').replace(':', '-').split('-')
+    date_processing = [int(v) for v in date_processing]
+    return datetime.datetime(*date_processing)
+
 
 ##################################################
 
@@ -76,13 +85,16 @@ def get_boards():
 
 @app.route('/lct/api/v1.0/boards', methods=['POST'])
 def add_board():
-    if not check_result(['name','user']):
+    if not check_result(['boardname','username','startdate']):
         abort(make_response(jsonify(message="Missing parameter"), 404))
-    if not dbconnect.check_user(request.json['user']):
+    if not dbconnect.check_user(request.json['username']):
         abort(make_response(jsonify(message="No such user"), 404))
+    startdate = conv_startdate(request.json['startdate'])
+
     board = {
-        'user': request.json['user'],
-        'name': request.json['name'],
+        'username': request.json['username'],
+        'boardname': request.json['boardname'],
+        'startdate': startdate,
         }
     dbconnect.add_board(board)
     # ToDo: return boardid
@@ -99,15 +111,16 @@ def get_board(boardid):
 
 @app.route('/lct/api/v1.0/boards/<boardid>', methods=['PUT'])
 def update_board(boardid):
-    if not check_result(['name','user']):
+    if not check_result(['boardname','username']):
         abort(make_response(jsonify(message="Missing parameter"), 404))
     if not dbconnect.check_board(boardid):
         abort(make_response(jsonify(message="No such board"), 404))
     if not dbconnect.check_user(request.json['user']):
         abort(make_response(jsonify(message="No such user"), 404))
     board = {
-        'name': request.json['name'],
-        'user': request.json['user'],
+        'boardname': request.json['boardname'],
+        'username': request.json['username'],
+        'startdate': request.json['startdate'],
         'boardid': boardid,
     }
     dbconnect.update_board(board)
