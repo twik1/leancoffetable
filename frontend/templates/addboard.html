@@ -1,21 +1,23 @@
-
 <!DOCTYPE html>
 <html lang="en">
- 
+
 <head>
     <title>Lean Coffee Table</title>
     <meta charset="utf-8">
     <link href='http://fonts.googleapis.com/css?family=Aldrich' rel='stylesheet' type='text/css'>
     <link href='http://fonts.googleapis.com/css?family=Roboto' rel='stylesheet' type='text/css'>
-    
+
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://bootswatch.com/4/lux/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tempusdominus-bootstrap-4/5.0.0-alpha16/css/tempusdominus-bootstrap-4.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/lct.css') }}">
-    
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.1/css/font-awesome.min.css">
+
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tempusdominus-bootstrap-4/5.0.0-alpha16/js/tempusdominus-bootstrap-4.min.js"></script>
 </head>
-      
+
 <body>
 
     <div class="bs-component">
@@ -26,8 +28,12 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarColor01">
                 <ul class="navbar-nav ml-auto">
-                    <a class="btn btn-primary" href="#">Home</a>
-                    <a class="btn btn-primary" href="#">Login</a>
+                    <a class="btn btn-primary" href={{ url_for( 'index') }}>Home</a>
+                    {% if param['loggedin'] == 'yes' %}
+                    <a class="btn btn-primary" href={{ url_for( 'logout') }}>Logout</a> 
+                    {% else %}
+                    <a class="btn btn-primary" href={{ url_for( 'login') }}>Login</a> 
+                    {% endif %}
                     <a class="btn btn-primary" href="#">About</a>
                 </ul>
             </div>
@@ -36,37 +42,61 @@
 
     <div class="row">
         <div class="col-lg-12">
-    <!--        <button type="button" class="btn btn-success float-right">Add new board</button> -->
+            <!--        <button type="button" class="btn btn-success float-right">Add new board</button> -->
         </div>
     </div>
-    
-<form id="boardinputform" method="POST">
-  <div class="form-group row">
-    <label for="userinput" class="col-sm-2 col-form-label">User</label>
-    <div class="col-sm-10">
-      <input type="text" class="form-control col-sm-4" name="username" id="userinput" placeholder="User">
+
+    <div class="container">
+        <form class="form-horizontal" role="form" method="POST">
+            <div class="row">
+                <div class="col-md-3"></div>
+                <div class="col-md-6">
+                    <h2>Add new board</h2>
+                    <hr>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-3">
+                    <label for="inputboard">Board name</label>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <div class="input-group mb-2 mr-sm-2 mb-sm-0">
+                            <div class="input-group-addon" style="width: 2.6rem"><i class="fas fa-heading"></i></div>
+                            <input type="text" class="form-control" name="boardname" id="inputboard" placeholder="Boardname">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-3">
+                    <label for="startdate">Startdate</label>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <div class="input-group mb-2 mr-sm-2 mb-sm-0">
+                            <div class="input-group-addon" style="width: 2.6rem"><i class="fas fa-heading"></i></div>
+                            <input type="datetime-local" class="form-control" name="startdate" id="startdate" placeholder="Boardname">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <input type="hidden" name="username" value="{{ param['username'] }}" />
+            <div class="row" style="padding-top: 1rem">
+                <div class="col-md-3"></div>
+                <div class="col-md-6">
+                    <button type="submit" class="btn btn-success"><i class="fa fa-sign-in"></i> Submit</button>
+                </div>
+            </div>
+        </form>
     </div>
-  </div>
-  <div class="form-group row">
-    <label for="inputboard" class="col-sm-2 col-form-label">Board heading</label>
-    <div class="col-sm-10">
-      <input type="text" class="form-control col-sm-4" name="boardname" id="inputboard" placeholder="Board heading">
-    </div>
-  </div>
-  <div class="form-group row">
-    <div class="col-sm-12">
-      <button type="submit" class="btn btn-success float-right">Submit</button>
-    </div>
-  </div>
-</form>    
-    
     <footer class="footer">
         <p>twik.duckdns.org</p>
     </footer>
- 
- 
+
+
 </body>
- 
+
 </html>
-
-

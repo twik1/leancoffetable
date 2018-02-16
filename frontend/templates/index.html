@@ -26,11 +26,11 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarColor01">
                 <ul class="navbar-nav ml-auto">
-                    <a class="btn btn-primary" href="#">Home</a>
+                    <a class="btn btn-primary" href={{ url_for('index') }}>Home</a>
                     {% if param['loggedin'] == 'yes' %}
-                        <a class="btn btn-primary" href="#">Logout</a>
+                        <a class="btn btn-primary" href={{ url_for('logout') }}>Logout</a>
                     {% else %}
-                        <a class="btn btn-primary" href="#">Login</a>
+                        <a class="btn btn-primary" href={{ url_for('login') }}>Login</a>
                     {% endif %}
                     <a class="btn btn-primary" href="#">About</a>
                 </ul>
@@ -40,17 +40,26 @@
 
     <div class="row">
         <div class="col-lg-12">
+            {% if param['loggedin'] == 'yes' %}
             <button type="button" class="btn btn-success float-right" onclick="location.href = 'addboard.html';">Add new board</button>
+            {% else %}
+            <button type="button" class="btn btn-success float-right disabled" onclick="location.href = 'addboard.html';">Add new board</button>
+            {% endif %}
         </div>
     </div>
-    
-    <div class="card">
-        <div class="card-block">
-            <h4 class="card-title">Meetup 27/2</h4>
+
+
+    {% if 'boardlist' in param %}
+        {% for board in param['boardlist'] %}
+            <div class="card">
+                <div class="card-block">
+                    <h4 class="card-title">{{ board[0]['name'] }}</h4>
             <h6 class="card-subtitle mb-2 text-muted">Lean Coffe Meetup</h6>
             <p class="card-text">Meetup at Ericsson with all the developers.</p>
         </div>
     </div>
+        {% endfor %}
+    {% endif %}
     
     
     <footer class="footer">

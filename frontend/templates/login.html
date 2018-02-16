@@ -1,13 +1,12 @@
-
 <!DOCTYPE html>
 <html lang="en">
- 
+
 <head>
     <title>Lean Coffee Table</title>
     <meta charset="utf-8">
     <link href='http://fonts.googleapis.com/css?family=Aldrich' rel='stylesheet' type='text/css'>
     <link href='http://fonts.googleapis.com/css?family=Roboto' rel='stylesheet' type='text/css'>
-    
+
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://bootswatch.com/4/lux/bootstrap.min.css">
@@ -16,7 +15,7 @@
 
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
 </head>
-      
+
 <body>
 
     <div class="bs-component">
@@ -27,11 +26,11 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarColor01">
                 <ul class="navbar-nav ml-auto">
-                    <a class="btn btn-primary" href="#">Home</a>
+                    <a class="btn btn-primary" href={{ url_for( 'index') }}>Home</a> 
                     {% if param['loggedin'] == 'yes' %}
-                        <a class="btn btn-primary" href="#">Logout</a>
+                    <a class="btn btn-primary" href={{ url_for( 'logout') }}>Logout</a> 
                     {% else %}
-                        <a class="btn btn-primary" href="#">Login</a>
+                    <a class="btn btn-primary" href={{ url_for( 'login') }}>Login</a> 
                     {% endif %}
                     <a class="btn btn-primary" href="#">About</a>
                 </ul>
@@ -41,10 +40,10 @@
 
     <div class="row">
         <div class="col-lg-12">
-    <!--        <button type="button" class="btn btn-success float-right">Add new board</button> -->
+            <!--        <button type="button" class="btn btn-success float-right">Add new board</button> -->
         </div>
     </div>
-    
+
     <div class="container">
         <form class="form-horizontal" role="form" method="POST" action="/login.html">
             <div class="row">
@@ -54,6 +53,7 @@
                     <hr>
                 </div>
             </div>
+
             <div class="row">
                 <div class="col-md-3"></div>
                 <div class="col-md-6">
@@ -61,19 +61,21 @@
                         <label class="sr-only" for="user">Username</label>
                         <div class="input-group mb-2 mr-sm-2 mb-sm-0">
                             <div class="input-group-addon" style="width: 2.6rem"><i class="fa fa-user"></i></div>
-                            <input type="text" name="user" class="form-control" id="user"
-                                   placeholder="username" required autofocus>
+                            <input type="text" name="user" class="form-control" id="user" placeholder="username" required autofocus>
                         </div>
                     </div>
                 </div>
                 <div class="col-md-3">
                     <div class="form-control-feedback">
                         <span class="text-danger align-middle">
-                            <i class="fa fa-close">{{ errormsg }}</i>
+                            {% if 'errormsg' in param %}
+                            <i class="fa fa-close">{{ param['errormsg'] }}</i>
+                            {% endif %}
                         </span>
                     </div>
                 </div>
             </div>
+
             <div class="row">
                 <div class="col-md-3"></div>
                 <div class="col-md-6">
@@ -81,8 +83,7 @@
                         <label class="sr-only" for="password">Password</label>
                         <div class="input-group mb-2 mr-sm-2 mb-sm-0">
                             <div class="input-group-addon" style="width: 2.6rem"><i class="fa fa-key"></i></div>
-                            <input type="password" name="password" class="form-control" id="password"
-                                   placeholder="Password" required>
+                            <input type="password" name="password" class="form-control" id="password" placeholder="Password" required>
                         </div>
                     </div>
                 </div>
@@ -103,14 +104,12 @@
             </div>
         </form>
     </div>
-    
+
     <footer class="footer">
         <p>twik.duckdns.org</p>
     </footer>
- 
- 
+
+
 </body>
- 
+
 </html>
-
-

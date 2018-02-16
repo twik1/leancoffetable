@@ -26,8 +26,12 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarColor01">
                 <ul class="navbar-nav ml-auto">
-                    <a class="btn btn-primary" href="#">Home</a>
-                    <a class="btn btn-primary" href="#">Login</a>
+                    <a class="btn btn-primary" href={{ url_for( 'index') }}>Home</a> 
+                    {% if param['loggedin'] == 'yes' %}
+                    <a class="btn btn-primary" href={{ url_for( 'logout') }}>Logout</a> 
+                    {% else %}
+                    <a class="btn btn-primary" href={{ url_for( 'login') }}>Login</a> 
+                    {% endif %}
                     <a class="btn btn-primary" href="#">About</a>
                 </ul>
             </div>
@@ -35,7 +39,9 @@
     </div>
 
     <div class="row">
-        <div class="col-lg-12"> <h2> {{errormsg}} </h2> </div>
+        {% if 'errormsg' in param %}
+        <div class="col-lg-12"> <h2> {{ param['errormsg'] }} </h2> </div>
+        {% endif %}
     </div>
     
 <!--    <div class="card">

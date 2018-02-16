@@ -10,35 +10,56 @@ sess = Session()
 @app.route('/')
 def index():
     param = {}
-    if session['username']:
+    if 'username' in session.keys():
         param['loggedin'] = 'yes'
-    #response = requests.get('http://localhost:5000/lct/api/v1.0/boards', headers=headers)
-    #restapi.getboards()
+        param['username'] = session['username']
+    boardlist = restapi.getboards()
+    param['boardlist'] = boardlist
     return render_template('index.html',param=param)
 
 
 @app.route('/login.html',methods=['GET', 'POST'])
 def login():
     param = {}
+    if 'username' in session.keys():
+        param['loggedin'] = 'yes'
+        param['username'] = session['username']
+
     if request.method == 'POST':
         ret = restapi.get('http://localhost:5000/lct/api/v1.0/users/'+request.form['user'])
         if ret['response'] == 0:
-            return render_template('error.html', errormsg='No contact with backend')
+            param['errormsg'] = 'No contact with backend'
+            return render_template('error.html', param=param)
         if not ret['response'] == 200:
-            return render_template('login.html', errormsg="Faulty user or password")
+            param['errormsg'] = 'Faulty user or password'
+            return render_template('login.html', param=param)
         else:
-            if ret['password'] == request.form['password']:
+            if ret['datalist'][0]['password'] == request.form['password']:
                 session['username'] = request.form['user']
                 param['loggedin'] = 'yes'
-                return render_template('index.html', param=param)
+                return redirect(url_for('index'))
             else:
-                return render_template('login.html', errormsg="Faulty user or password")
+                param['errormsg'] = 'Faulty user or password'
+                return render_template('login.html', param=param)
     else:
         return render_template('login.html', param=param)
 
 
+@app.route('/logout.html',methods=['GET'])
+def logout():
+    param = {}
+    if 'username' in session.keys():
+        session.pop('username')
+    return render_template('login.html', param=param)
+
+
 @app.route('/newuser.html',methods=['GET', 'POST'])
 def newuser():
+    param = {}
+    if 'username' in session.keys():
+        param['loggedin'] = 'yes'
+        param['username'] = session['username']
+
     if request.method == 'POST':
         user = request.form['user']
         name = request.form['name']
@@ -46,26 +67,36 @@ def newuser():
         data = {'user': user,'name':name, 'password':password}
         ret = restapi.post('http://localhost:5000/lct/api/v1.0/users', data)
         if ret['response'] == 0:
-            return render_template('error.html', errormsg='No contact with backend')
+            param['errormsg'] = 'No contact with backend'
+            return render_template('error.html', param=param)
         if ret['response'] == 201:
-            return render_template('login.html')
+            session['username'] = request.form['user']
+            param['loggedin'] = 'yes'
+            return render_template('index.html', param=param)
     else:
-        return render_template('newuser.html')
+        return render_template('newuser.html', param=param)
 
 
 
 @app.route('/addboard.html',methods=['GET','POST'])
 def addboard():
+    param = {}
+    if 'username' in session.keys():
+        param['loggedin'] = 'yes'
+        param['username'] = session['username']
+
     if request.method == 'POST':
         username = request.form['username']
         boardname = request.form['boardname']
-        data = {'user':username,'name':boardname}
+        startdate = request.form['startdate']
+        data = {'username':username,'boardname':boardname, 'startdate':startdate}
         if restapi.post('http://localhost:5000/lct/api/v1.0/boards', data):
             return redirect(url_for('index'))
         else:
-            return render_template('error.html', errormsg='No contact with backend')
+            param['errormsg'] = 'No contact with backend'
+            return render_template('error.html', param=param)
     else:
-        return render_template('addboard.html')
+        return render_template('addboard.html',param=param)
 
 
 if __name__ == '__main__':

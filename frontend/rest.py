@@ -13,7 +13,7 @@ class CurlREST:
             ret = requests.get(url, headers=self.headers)
             response['response'] = ret.status_code
             if ret.status_code == 200:
-                response.update(ret.json()[0])
+                response['datalist'] = ret.json()
             return response
         except requests.exceptions.RequestException as e:
             response['response'] = 0
@@ -42,6 +42,7 @@ class CurlREST:
     def getboards(self):
         boardlist = []
         ids = self.get(self.baseurl+"boards")
-        for id in ids:
-            #board = self.get(self.baseurl+'boards/'+str(id['boardid']))
-            print(board)
+        for id in ids['datalist']:
+            board = self.get(self.baseurl+'boards/'+str(id['boardid']))
+            boardlist.append(board['datalist'])
+        return boardlist
