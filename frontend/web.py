@@ -99,6 +99,35 @@ def addboard():
         return render_template('addboard.html',param=param)
 
 
+@app.route('/delboard/<boardid>')
+def delboard(boardid):
+    param = {}
+    if 'username' in session.keys():
+        ret = restapi.get('http://localhost:5000/lct/api/v1.0/boards/'+boardid)
+        if ret['response'] == 0:
+            param['errormsg'] = 'No contact with backend'
+            return render_template('error.html', param=param)
+        if not ret['response'] == 200:
+            param['errormsg'] = 'No such board'
+            return render_template('login.html', param=param)
+        if not ret['datalist'][0]['user'] == session['username']:
+            param['errormsg'] = 'Can not delete anyone else board'
+            return render_template('error.html', param=param)
+        else:
+            ret = restapi.delete('http://localhost:5000/lct/api/v1.0/boards/' + boardid)
+            if ret['response'] == 0:
+                param['errormsg'] = 'No contact with backend'
+                return render_template('error.html', param=param)
+            if not ret['response'] == 201:
+                param['errormsg'] = 'No such board'
+                return render_template('error.html', param=param)
+            else:
+                return redirect(url_for('index'))
+    else:
+        param['errormsg'] = 'You need to be logged in to delete a board'
+        return render_template('error.html', param=param)
+
+
 if __name__ == '__main__':
     app.secret_key = 'super secret key'
     app.config['SESSION_TYPE'] = 'filesystem'

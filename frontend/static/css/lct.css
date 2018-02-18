@@ -24,13 +24,18 @@
         padding-bottom: 1px;
     }
     .card {
-        background-color: #3333;
+        /*background-color: #3333;*/
         padding: 3px;
         margin: 8px;
+        }
+    .card:focus
+    .card:hover {
+            box-shadow: 0 5px 11px 0 rgba(0, 0, 0, 0.18), 0 4px 15px 0 rgba(0, 0, 0, 0.15);
         }
     .row{
         margin-left: 0;
         margin-right: 0;
         }
 #boardinputform {margin-top: 30px;}
+#del {background-color: #3333;}
 /**.container { margin: 10px; }**/

@@ -31,13 +31,16 @@ class CurlREST:
             return response
 
 
-
-    def delete(self, url, param):
+    def delete(self, url):
+        response = {}
         try:
-            ret = requests.put(url, headers=self.headers, data=json.dumps(param))
-            return ret
+            ret = requests.delete(url, headers=self.headers)
+            response['response'] = ret.status_code
+            return response
         except requests.exceptions.RequestException as e:
-            return None
+            response['response'] = 0
+            return response
+
 
     def getboards(self):
         boardlist = []

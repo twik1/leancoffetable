@@ -5,19 +5,29 @@
 <head>
     <title>Lean Coffee Table</title>
     <meta charset="utf-8">
-    <link href='http://fonts.googleapis.com/css?family=Aldrich' rel='stylesheet' type='text/css'>
-    <link href='http://fonts.googleapis.com/css?family=Roboto' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Aldrich' rel='stylesheet' type='text/css'/>
+    <link href='http://fonts.googleapis.com/css?family=Roboto' rel='stylesheet' type='text/css'/>
     
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://bootswatch.com/4/lux/bootstrap.min.css">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/lct.css') }}">
-    
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@3.5.2/animate.min.css"/>
+    <link rel="stylesheet" href="https://bootswatch.com/4/lux/bootstrap.min.css"/>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/lct.css') }}"/>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.1/css/font-awesome.min.css"/>
+
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+    <script>
+        function delboard(boardid) {
+            if (confirm(`Are you sure you want to delete board ${boardid}?`)) {
+                var url = '{{ url_for('delboard', boardid='') }}';
+                window.location.href=url+boardid.toString();
+                }
+            return false;
+            }
+    </script>
 </head>
       
 <body>
-
     <div class="bs-component">
         <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
             <a class="navbar-brand" href="#">lean Coffee Table</a>
@@ -49,18 +59,31 @@
     </div>
 
 
+    <div class="card-group">
     {% if 'boardlist' in param %}
         {% for board in param['boardlist'] %}
-            <div class="card">
-                <div class="card-block">
-                    <h4 class="card-title">{{ board[0]['name'] }}</h4>
-            <h6 class="card-subtitle mb-2 text-muted">Lean Coffe Meetup</h6>
-            <p class="card-text">Meetup at Ericsson with all the developers.</p>
+        <div class="col m4">
+            <div class="card" style="width: 18rem;">
+                <div class="card-header">
+                    <h5 class="card-title">{{ board[0]['name'] }}</h5>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">{{ board[0]['date'] }}</p>
+                    {% if 'username' in param %}
+                        {% if param['username'] == board[0]['user'] %}
+                            <a class="tooltips" data-toggle="tooltip" data-placement="top" title="Delete">
+                            <button type="button" onclick="delboard( {{ board[0]['boardid'] }} )" style="border: 0; background: none;">
+                                <i class="fa fa-trash-o fa-2x" aria-hidden="true"></i>
+                            </button>
+                            </a>
+                        {% endif %}
+                    {% endif %}
+                </div>
+            </div>
         </div>
-    </div>
         {% endfor %}
     {% endif %}
-    
+    </div>
     
     <footer class="footer">
         <p>twik.duckdns.org</p>
