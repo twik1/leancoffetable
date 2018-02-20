@@ -43,9 +43,34 @@ class CurlREST:
 
 
     def getboards(self):
-        boardlist = []
+        datastore = {}
+        datastore['data'] = []
+        datastore['ctrl'] = {}
         ids = self.get(self.baseurl+"boards")
-        for id in ids['datalist']:
-            board = self.get(self.baseurl+'boards/'+str(id['boardid']))
-            boardlist.append(board['datalist'])
-        return boardlist
+        datastore['ctrl']['response'] = ids['response']
+        if 'datalist' in ids:
+            for id in ids['datalist']:
+                board = self.get(self.baseurl+'boards/'+str(id['boardid']))
+                datastore['data'].append(board['datalist'][0])
+        return datastore
+
+
+    def gettopics(self, boardid):
+        datastore = {}
+        datastore['data'] = []
+        datastore['ctrl'] = {}
+        datastore['vote'] = []
+        board = self.get(self.baseurl + 'boards/' + boardid)
+        if 'datalist' in board:
+            datastore['ctrl']['user'] = board['datalist'][0]['user']
+
+        ids = self.get(self.baseurl+"boards/"+boardid+'/topics')
+        datastore['ctrl']['response'] = ids['response']
+
+        if 'datalist' in ids:
+            for id in ids['datalist']:
+                topic = self.get(self.baseurl+'boards/'+boardid+'/topics/'+str(id['topicid']))
+                datastore['data'].append(topic['datalist'][0])
+                #vids = ids = self.get(self.baseurl+"boards/"+boardid+'/topics/'+str(id['topicid'])+'/votes')
+
+        return datastore

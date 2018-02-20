@@ -29,7 +29,7 @@
             <div class="collapse navbar-collapse" id="navbarColor01">
                 <ul class="navbar-nav ml-auto">
                     <a class="btn btn-primary" href={{ url_for( 'index') }}>Home</a>
-                    {% if param['loggedin'] == 'yes' %}
+                    {% if param['ctrl']['loggedin'] == 'yes' %}
                     <a class="btn btn-primary" href={{ url_for( 'logout') }}>Logout</a> 
                     {% else %}
                     <a class="btn btn-primary" href={{ url_for( 'login') }}>Login</a> 

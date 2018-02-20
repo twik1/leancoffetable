@@ -208,8 +208,47 @@ def get_votes(boardid, topicid):
         abort(400)
     if not dbconnect.check_topic(topicid):
         abort(400)
-    dbvotelist = dbconnect.get_votes(topicid)
+    dbvotelist = dbconnect.get_votes(boardid,topicid)
     return json.dumps(dbvotelist)
+
+
+@app.route('/lct/api/v1.0/boards/<boardid>/topics/<topicid>/votes', methods=['POST'])
+def add_vote(boardid, topicid):
+    if not check_result(['user']):
+        abort(make_response(jsonify(message="Missing parameter"), 404))
+    if not dbconnect.check_board(boardid):
+        abort(make_response(jsonify(message="No such board"), 404))
+    if not dbconnect.check_board(topicid):
+        abort(make_response(jsonify(message="No such topic"), 404))
+    vote = {
+        'user': request.json['user'],
+        'topicid': topicid,
+        }
+    dbconnect.add_vote(vote)
+    # ToDo: return topicid
+    return jsonify(vote), 201
+
+
+@app.route('/lct/api/v1.0/boards/<boardid>/topics/<topicid>/votes/<voteid>', methods=['GET'])
+def get_vote(boardid, topicid, voteid):
+    if not dbconnect.check_board(boardid):
+        abort(400)
+    if not dbconnect.check_topic(topicid):
+        abort(400)
+    dbvote = dbconnect.get_vote(topicid,voteid)
+    if not len(dbvote):
+        abort(make_response(jsonify(message="No such vote"), 404))
+    return jsonify(dbvote)
+
+
+@app.route('/lct/api/v1.0/boards/<boardid>/topics/<topicid>/votes/<voteid>', methods=['DELETE'])
+def delete_vote(boardid, topicid, voteid):
+    if not dbconnect.check_board(boardid):
+        abort(make_response(jsonify(message="No such board"), 404))
+    if not dbconnect.check_topic(topicid):
+        abort(make_response(jsonify(message="No such topic"), 404))
+    dbconnect.del_vote(voteid)
+    return jsonify({'voteid': voteid}), 201
 
 
 if __name__ == '__main__':

@@ -17,18 +17,16 @@
 
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
     <script>
-        function delboard(boardid) {
-            if (confirm(`Are you sure you want to delete board ${boardid}?`)) {
-                var url = '{{ url_for('delboard', boardid='') }}';
-                window.location.href=url+boardid.toString();
-                }
-            return false;
+        function deltopic(boardid) {
+            /*var url = '{{ url_for('newtopic', boardid='') }}';
+            window.location.href=url+boardid.toString();*/
             }
 
-        function openboard(boardid) {
-            var url = '{{ url_for('board', boardid='', ) }}';
-            window.location.href=url+boardid.toString();
-            }
+        function votetopic(boardid, topicid) {
+            var url = '{{ url_for('newvote', boardid='B', topicid='T') }}';
+            /*window.location.href=url+topicid.toString();*/
+            alert(url);
+        }
     </script>
 </head>
       
@@ -56,9 +54,9 @@
     <div class="row">
         <div class="col-lg-12">
             {% if param['ctrl']['loggedin'] == 'yes' %}
-            <button type="button" class="btn btn-success float-right" onclick="location.href = 'newboard';">Add new board</button>
+            <button type="button" class="btn btn-success float-right" onclick="newtopic( {{ param['ctrl']['boardid'] }} )">Add new topic</button>
             {% else %}
-            <button type="button" class="btn btn-success float-right disabled" disabled="disabled" onclick="location.href = 'newboard';">Add new board</button>
+            <button type="button" class="btn btn-success float-right disabled" disabled="disabled" onclick="newtopic( {{ param['ctrl']['boardid'] }} )">Add new topic</button>
             {% endif %}
         </div>
     </div>
@@ -66,26 +64,26 @@
 
     <div class="card-group">
 
-        {% for board in param['data'] %}
+        {% for topic in param['data'] %}
         <div class="col m4">
             <div class="card" style="width: 18rem;">
                 <div class="card-header">
-                    <h5 class="card-title">{{ board['name'] }}</h5>
+                    <h5 class="card-title">{{ topic['heading'] }}</h5>
                 </div>
                 <div class="card-body">
-                    <p class="card-text">{{ board['date'] }}</p>
+                    <p class="card-text">{{ topic['description'] }}</p>
                     {% if 'sessionname' in param['ctrl'] %}
-                        {% if param['ctrl']['sessionname'] == board['user'] %}
+                        {% if param['ctrl']['sessionname'] == param['ctrl']['user'] %}
                             <a class="tooltips" data-toggle="tooltip" data-placement="top" title="Delete">
-                            <button type="button" onclick="delboard( {{ board['boardid'] }} )" style="border: 0; background: none;">
+                            <button type="button" onclick="deltopic( {{ topic['topicid'] }} )" style="border: 0; background: none;">
                                 <i class="fa fa-trash-o fa-2x" aria-hidden="true"></i>
                             </button>
                             </a>
                         {% endif %}
                     {% endif %}
-                    <a class="tooltips" data-toggle="tooltip" data-placement="top" title="Open board">
-                        <button type="button" onclick="openboard( {{ board['boardid'] }} )" style="border: 0; background: none;">
-                            <i class="fa fa-sticky-note fa-2x" aria-hidden="true"></i>
+                    <a class="tooltips" data-toggle="tooltip" data-placement="top" title="Vote">
+                        <button type="button" onclick="votetopic( {{ topic['topicid'] }},'6' )" style="border: 0; background: none;">
+                            <i class="fa fa-thumbs-down fa-2x" aria-hidden="true"></i>
                         </button>
                     </a>
                 </div>
@@ -94,7 +92,7 @@
         {% endfor %}
 
     </div>
-    
+
     <footer class="footer">
         <p>twik.duckdns.org</p>
     </footer>

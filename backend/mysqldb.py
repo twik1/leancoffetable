@@ -156,7 +156,7 @@ heading='%s',description='%s',created=null,updated=null" % \
             "INSERT INTO topic(topicid,boardid,heading,description,created,updated) \
 VALUES ('%s','%s','%s','%s',null,null) ON DUPLICATE KEY UPDATE \
 heading='%s',description='%s',created=null,updated=null" % \
-            (obj['topicid'], obj['boardid'], obj['heading'], obj['description'], obj['heading'], obj['description'])
+        (obj['topicid'], obj['boardid'], obj['heading'], obj['description'], obj['heading'], obj['description'])
         self.db_set(sql)
 
 
@@ -193,3 +193,32 @@ heading='%s',description='%s',created=null,updated=null" % \
             votelist.append({'voteid': vote[0]})
         return votelist
 
+
+    def add_vote(self, obj):
+        sql = \
+            "INSERT INTO votes(user,topicid) \
+VALUES ('%s','%s') ON DUPLICATE KEY UPDATE user='%s',topicid='%s'" % \
+        (obj['user'], obj['topicid'])
+        self.db_set(sql)
+
+
+    def get_vote(self, topicid, voteid):
+        votevalues = []
+        sql = "SELECT * FROM votes WHERE voteid = '%s'" % voteid
+        votetup = self.db_get(sql)
+        if len(votetup):
+            votetup = votetup[0]
+            votevalues.append({'user': votetup[1]})
+        return votevalues
+
+
+    def check_vote(self, voteid):
+        if self.get_vote(voteid):
+            return True
+        else:
+            return False
+
+
+    def del_vote(self, voteid):
+        sql = "DELETE FROM votes WHERE voteid = '%s'" % voteid
+        self.db_set(sql)
