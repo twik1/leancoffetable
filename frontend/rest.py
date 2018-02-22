@@ -55,11 +55,9 @@ class CurlREST:
         return datastore
 
 
-    def gettopics(self, boardid):
-        datastore = {}
+    def gettopics(self, boardid, datastore):
         datastore['data'] = []
-        datastore['ctrl'] = {}
-        datastore['vote'] = []
+        index = 0
         board = self.get(self.baseurl + 'boards/' + boardid)
         if 'datalist' in board:
             datastore['ctrl']['user'] = board['datalist'][0]['user']
@@ -69,8 +67,19 @@ class CurlREST:
 
         if 'datalist' in ids:
             for id in ids['datalist']:
+                thumbsup = 0
+                numvote = 0
                 topic = self.get(self.baseurl+'boards/'+boardid+'/topics/'+str(id['topicid']))
                 datastore['data'].append(topic['datalist'][0])
-                #vids = ids = self.get(self.baseurl+"boards/"+boardid+'/topics/'+str(id['topicid'])+'/votes')
-
+                # Handle votes
+                vids = self.get(self.baseurl+"boards/"+boardid+'/topics/'+str(id['topicid'])+'/votes')
+                if 'datalist' in vids:
+                    for ids in vids['datalist']:
+                        vote = self.get(self.baseurl+"boards/"+boardid+'/topics/'+str(id['topicid'])+'/votes/'+str(ids['voteid']))
+                        if 'datalist' in vote:
+                            if datastore['ctrl']['sessionname'] == vote['datalist'][0]['user']:
+                                datastore['data'][index]['thumbsup'] = str(ids['voteid'])
+                        numvote = numvote + 1
+                datastore['data'][index]['numvote'] = numvote
+                index = index + 1
         return datastore

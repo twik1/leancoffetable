@@ -17,14 +17,14 @@
 
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
     <script>
-        function deltopic(boardid) {
-            /*var url = '{{ url_for('newtopic', boardid='') }}';
-            window.location.href=url+boardid.toString();*/
+        function newtopic(boardid) {
+            var url = '{{ url_for('newtopic', boardid='') }}';
+            window.location.href=url+boardid.toString();
             }
 
         function votetopic(boardid, topicid) {
             var url = '{{ url_for('newvote', boardid='B', topicid='T') }}';
-            /*window.location.href=url+topicid.toString();*/
+            // window.location.href=url+topicid.toString();
             alert(url);
         }
     </script>
@@ -82,10 +82,17 @@
                         {% endif %}
                     {% endif %}
                     <a class="tooltips" data-toggle="tooltip" data-placement="top" title="Vote">
-                        <button type="button" onclick="votetopic( {{ topic['topicid'] }},'6' )" style="border: 0; background: none;">
+                        {% if 'thumbsup' in topic %}
+                        <button type="button" onclick="location.href='{{ url_for('delvote',boardid=topic['boardid'],topicid=topic['topicid'],voteid=topic['thumbsup']) }}'" style="border: 0; background: none;">
+                            <i class="fa fa-thumbs-up fa-2x" aria-hidden="true"></i>
+                        </button>
+                        {% else %}
+                        <button type="button" onclick="location.href='{{ url_for('newvote',boardid=topic['boardid'],topicid=topic['topicid']) }}'" style="border: 0; background: none;">
                             <i class="fa fa-thumbs-down fa-2x" aria-hidden="true"></i>
                         </button>
+                        {% endif %}
                     </a>
+                    <p class="card-text">{{ topic['numvote'] }} Votes</p>
                 </div>
             </div>
         </div>

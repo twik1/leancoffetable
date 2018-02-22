@@ -218,7 +218,7 @@ def add_vote(boardid, topicid):
         abort(make_response(jsonify(message="Missing parameter"), 404))
     if not dbconnect.check_board(boardid):
         abort(make_response(jsonify(message="No such board"), 404))
-    if not dbconnect.check_board(topicid):
+    if not dbconnect.check_topic(topicid):
         abort(make_response(jsonify(message="No such topic"), 404))
     vote = {
         'user': request.json['user'],

@@ -166,7 +166,7 @@ heading='%s',description='%s',created=null,updated=null" % \
         topictup = self.db_get(sql)
         if len(topictup):
             topictup = topictup[0]
-            topicvalues.append({'heading': topictup[2], 'description': topictup[3]})
+            topicvalues.append({'topicid':topictup[0],'boardid':topictup[1],'heading': topictup[2], 'description': topictup[3]})
         return topicvalues
 
 
@@ -198,7 +198,7 @@ heading='%s',description='%s',created=null,updated=null" % \
         sql = \
             "INSERT INTO votes(user,topicid) \
 VALUES ('%s','%s') ON DUPLICATE KEY UPDATE user='%s',topicid='%s'" % \
-        (obj['user'], obj['topicid'])
+        (obj['user'], obj['topicid'],obj['user'], obj['topicid'])
         self.db_set(sql)
 
 
@@ -208,7 +208,7 @@ VALUES ('%s','%s') ON DUPLICATE KEY UPDATE user='%s',topicid='%s'" % \
         votetup = self.db_get(sql)
         if len(votetup):
             votetup = votetup[0]
-            votevalues.append({'user': votetup[1]})
+            votevalues.append({'user': votetup[1],'topicid': votetup[2]})
         return votevalues
 
 

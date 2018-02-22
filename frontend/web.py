@@ -25,8 +25,8 @@ def index():
 def login():
     param = {}
     if 'username' in session.keys():
-        param['loggedin'] = 'yes'
-        param['username'] = session['username']
+        param['ctrl']['loggedin'] = 'yes'
+        param['ctrl']['sessionname'] = session['username']
 
     if request.method == 'POST':
         ret = restapi.get('http://localhost:5000/lct/api/v1.0/users/'+request.form['user'])
@@ -59,9 +59,11 @@ def logout():
 @app.route('/newuser.html',methods=['GET', 'POST'])
 def newuser():
     param = {}
+    param['data'] = []
+    param['ctrl'] = {}
     if 'username' in session.keys():
-        param['loggedin'] = 'yes'
-        param['username'] = session['username']
+        param['ctrl']['loggedin'] = 'yes'
+        param['ctrl']['sessionname'] = session['username']
 
     if request.method == 'POST':
         user = request.form['user']
@@ -87,8 +89,8 @@ def newboard():
     param['data'] = []
     param['ctrl'] = {}
     if 'username' in session.keys():
-        param['loggedin'] = 'yes'
-        param['username'] = session['username']
+        param['ctrl']['loggedin'] = 'yes'
+        param['ctrl']['sessionname'] = session['username']
 
     if request.method == 'POST':
         username = request.form['username']
@@ -107,6 +109,10 @@ def newboard():
 @app.route('/delboard/<boardid>')
 def delboard(boardid):
     param = {}
+    if 'username' in session.keys():
+        param['ctrl']['loggedin'] = 'yes'
+        param['ctrl']['sessionname'] = session['username']
+
     if 'username' in session.keys():
         ret = restapi.get('http://localhost:5000/lct/api/v1.0/boards/'+boardid)
         if ret['response'] == 0:
@@ -135,10 +141,12 @@ def delboard(boardid):
 
 @app.route('/board/<boardid>')
 def board(boardid):
-    param = restapi.gettopics(boardid)
+    param = {}
+    param ['ctrl'] ={}
     if 'username' in session.keys():
         param['ctrl']['loggedin'] = 'yes'
         param['ctrl']['sessionname'] = session['username']
+    param = restapi.gettopics(boardid, param)
     param['ctrl']['boardid'] = boardid
     if param['ctrl']['response'] == 0:
         param['ctrl']['errormsg'] = 'No contact with backend'
@@ -149,10 +157,11 @@ def board(boardid):
 @app.route('/boards/<boardid>',methods=['GET','POST'])
 def newtopic(boardid):
     param = {}
+    param ['ctrl'] ={}
     param['boardid'] = boardid
     if 'username' in session.keys():
-        param['loggedin'] = 'yes'
-        param['username'] = session['username']
+        param['ctrl']['loggedin'] = 'yes'
+        param['ctrl']['sessionname'] = session['username']
 
     if request.method == 'POST':
         topicheading = request.form['topicheading']
@@ -172,6 +181,9 @@ def newtopic(boardid):
 def deltopic(boardid, topicid):
     param = {}
     if 'username' in session.keys():
+        param['ctrl']['loggedin'] = 'yes'
+        param['ctrl']['sessionname'] = session['username']
+
         ret = restapi.get('http://localhost:5000/lct/api/v1.0/boards/'+boardid+'/topics/'+topicid)
         if ret['response'] == 0:
             param['errormsg'] = 'No contact with backend'
@@ -201,8 +213,16 @@ def deltopic(boardid, topicid):
 def newvote(boardid, topicid):
     if 'username' in session.keys():
         data = {'user': session['username'], 'topicid': topicid}
-        ret = restapi.post('http://localhost:5000/lct/api/v1.0/boards/'+boardid+'/topics/'+topicid, data)
+        ret = restapi.post('http://localhost:5000/lct/api/v1.0/boards/'+boardid+'/topics/'+topicid+'/votes', data)
     return redirect(url_for('board', boardid=boardid))
+
+
+@app.route('/boards/<boardid>/topics/<topicid>/votes/<voteid>',methods=['GET'])
+def delvote(boardid, topicid, voteid):
+    if 'username' in session.keys():
+       ret = restapi.delete('http://localhost:5000/lct/api/v1.0/boards/'+boardid+'/topics/'+topicid+'/votes/'+voteid)
+    return redirect(url_for('board', boardid=boardid))
+
 
 
 if __name__ == '__main__':
