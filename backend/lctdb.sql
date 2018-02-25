@@ -29,6 +29,7 @@ CREATE TABLE topic (
 	boardid INT,
 	heading CHAR(128),
 	description TEXT,
+	user CHAR(80) NOT NULL,
 	created TIMESTAMP DEFAULT '0000-00-00 00:00:00',
 	updated TIMESTAMP DEFAULT now() ON UPDATE now(),
 	FOREIGN KEY (boardid) REFERENCES board (boardid) ON DELETE CASCADE,

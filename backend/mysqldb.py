@@ -144,19 +144,21 @@ user='%s',name='%s',startdate='%s',created=null,updated=null" % \
 
     def add_topic(self, obj):
         sql = \
-            "INSERT INTO topic(boardid,heading,description,created,updated) \
-VALUES ('%s','%s','%s',null,null) ON DUPLICATE KEY UPDATE \
-heading='%s',description='%s',created=null,updated=null" % \
-            (obj['boardid'], obj['heading'], obj['description'], obj['heading'], obj['description'])
+            "INSERT INTO topic(boardid,heading,description,user,created,updated) \
+VALUES ('%s','%s','%s','%s',null,null) ON DUPLICATE KEY UPDATE \
+boardid='%s',heading='%s',description='%s',user='%s',created=null,updated=null" % \
+            (obj['boardid'], obj['heading'], obj['description'], obj['user'], \
+             obj['boardid'], obj['heading'], obj['description'], obj['user'])
         self.db_set(sql)
 
 
     def update_topic(self, obj):
         sql = \
-            "INSERT INTO topic(topicid,boardid,heading,description,created,updated) \
+            "INSERT INTO topic(boardid,heading,description,user,created,updated) \
 VALUES ('%s','%s','%s','%s',null,null) ON DUPLICATE KEY UPDATE \
-heading='%s',description='%s',created=null,updated=null" % \
-        (obj['topicid'], obj['boardid'], obj['heading'], obj['description'], obj['heading'], obj['description'])
+boardid='%s',heading='%s',description='%s',user='%s',created=null,updated=null" % \
+            (obj['boardid'], obj['heading'], obj['description'], obj['user'], \
+             obj['boardid'], obj['heading'], obj['description'], obj['user'])
         self.db_set(sql)
 
 
@@ -166,7 +168,8 @@ heading='%s',description='%s',created=null,updated=null" % \
         topictup = self.db_get(sql)
         if len(topictup):
             topictup = topictup[0]
-            topicvalues.append({'topicid':topictup[0],'boardid':topictup[1],'heading': topictup[2], 'description': topictup[3]})
+            topicvalues.append({'topicid':topictup[0],'boardid':topictup[1],'heading': topictup[2],
+                                'description': topictup[3], 'user':topictup[4]})
         return topicvalues
 
 

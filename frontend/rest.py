@@ -59,8 +59,8 @@ class CurlREST:
         datastore['data'] = []
         index = 0
         board = self.get(self.baseurl + 'boards/' + boardid)
-        if 'datalist' in board:
-            datastore['ctrl']['user'] = board['datalist'][0]['user']
+#        if 'datalist' in board:
+#            datastore['ctrl']['user'] = board['datalist'][0]['user']
 
         ids = self.get(self.baseurl+"boards/"+boardid+'/topics')
         datastore['ctrl']['response'] = ids['response']

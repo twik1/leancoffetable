@@ -24,6 +24,8 @@ def index():
 @app.route('/login.html',methods=['GET', 'POST'])
 def login():
     param = {}
+    param['data'] = []
+    param['ctrl'] = {}
     if 'username' in session.keys():
         param['ctrl']['loggedin'] = 'yes'
         param['ctrl']['sessionname'] = session['username']
@@ -51,6 +53,8 @@ def login():
 @app.route('/logout.html',methods=['GET'])
 def logout():
     param = {}
+    param['data'] = []
+    param['ctrl'] = {}
     if 'username' in session.keys():
         session.pop('username')
     return render_template('login.html', param=param)
@@ -76,8 +80,10 @@ def newuser():
             return render_template('error.html', param=param)
         if ret['response'] == 201:
             session['username'] = request.form['user']
-            param['loggedin'] = 'yes'
-            return render_template('index.html', param=param)
+            param['ctrl']['loggedin'] = 'yes'
+            param['ctrl']['sessionname'] = session['username']
+            return redirect(url_for('index', param=param))
+            #return render_template('index.html', param=param)
     else:
         return render_template('newuser.html', param=param)
 
@@ -109,6 +115,7 @@ def newboard():
 @app.route('/delboard/<boardid>')
 def delboard(boardid):
     param = {}
+    param ['ctrl'] ={}
     if 'username' in session.keys():
         param['ctrl']['loggedin'] = 'yes'
         param['ctrl']['sessionname'] = session['username']
@@ -167,7 +174,7 @@ def newtopic(boardid):
         topicheading = request.form['topicheading']
         topicdesc = request.form['topicdesc']
         boardid = request.form['boardid']
-        data = {'heading':topicheading,'description':topicdesc}
+        data = {'heading':topicheading,'description':topicdesc,'user':session['username']}
         if restapi.post('http://localhost:5000/lct/api/v1.0/boards/'+boardid+'/topics', data):
             return redirect(url_for('board',boardid=boardid))
         else:
@@ -180,6 +187,7 @@ def newtopic(boardid):
 @app.route('/boards/<boardid>/deltopic/<topicid>',methods=['GET'])
 def deltopic(boardid, topicid):
     param = {}
+    param ['ctrl'] ={}
     if 'username' in session.keys():
         param['ctrl']['loggedin'] = 'yes'
         param['ctrl']['sessionname'] = session['username']

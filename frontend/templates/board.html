@@ -73,7 +73,7 @@
                 <div class="card-body">
                     <p class="card-text">{{ topic['description'] }}</p>
                     {% if 'sessionname' in param['ctrl'] %}
-                        {% if param['ctrl']['sessionname'] == param['ctrl']['user'] %}
+                        {% if param['ctrl']['sessionname'] == topic['user'] %}
                             <a class="tooltips" data-toggle="tooltip" data-placement="top" title="Delete">
                             <button type="button" onclick="deltopic( {{ topic['topicid'] }} )" style="border: 0; background: none;">
                                 <i class="fa fa-trash-o fa-2x" aria-hidden="true"></i>

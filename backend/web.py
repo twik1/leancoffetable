@@ -148,13 +148,14 @@ def get_topics(boardid):
 
 @app.route('/lct/api/v1.0/boards/<boardid>/topics', methods=['POST'])
 def add_topic(boardid):
-    if not check_result(['heading','description']):
+    if not check_result(['heading','description','user']):
         abort(make_response(jsonify(message="Missing parameter"), 404))
     if not dbconnect.check_board(boardid):
         abort(make_response(jsonify(message="No such board"), 404))
     topic = {
         'heading': request.json['heading'],
         'description': request.json['description'],
+        'user': request.json['user'],
         'boardid': boardid,
         }
     dbconnect.add_topic(topic)
