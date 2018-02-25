@@ -102,6 +102,8 @@ def newboard():
         username = request.form['username']
         boardname = request.form['boardname']
         startdate = request.form['startdate']
+        if startdate == '':
+            startdate = '1970-01-01T00:00'
         data = {'username':username,'boardname':boardname, 'startdate':startdate}
         if restapi.post('http://localhost:5000/lct/api/v1.0/boards', data):
             return redirect(url_for('index'))
