@@ -33,18 +33,18 @@ def login():
     if request.method == 'POST':
         ret = restapi.get('http://localhost:5000/lct/api/v1.0/users/'+request.form['user'])
         if ret['response'] == 0:
-            param['errormsg'] = 'No contact with backend'
+            param['ctrl']['errormsg'] = 'No contact with backend'
             return render_template('error.html', param=param)
         if not ret['response'] == 200:
-            param['errormsg'] = 'Faulty user or password'
+            param['ctrl']['errormsg'] = 'Faulty user or password'
             return render_template('login.html', param=param)
         else:
             if ret['datalist'][0]['password'] == request.form['password']:
                 session['username'] = request.form['user']
-                param['loggedin'] = 'yes'
+                param['ctrl']['loggedin'] = 'yes'
                 return redirect(url_for('index'))
             else:
-                param['errormsg'] = 'Faulty user or password'
+                param['ctrl']['errormsg'] = 'Faulty user or password'
                 return render_template('login.html', param=param)
     else:
         return render_template('login.html', param=param)
@@ -76,7 +76,7 @@ def newuser():
         data = {'user': user,'name':name, 'password':password}
         ret = restapi.post('http://localhost:5000/lct/api/v1.0/users', data)
         if ret['response'] == 0:
-            param['errormsg'] = 'No contact with backend'
+            param['ctrl']['errormsg'] = 'No contact with backend'
             return render_template('error.html', param=param)
         if ret['response'] == 201:
             session['username'] = request.form['user']
@@ -108,7 +108,7 @@ def newboard():
         if restapi.post('http://localhost:5000/lct/api/v1.0/boards', data):
             return redirect(url_for('index'))
         else:
-            param['errormsg'] = 'No contact with backend'
+            param['ctrl']['errormsg'] = 'No contact with backend'
             return render_template('error.html', param=param)
     else:
         return render_template('newboard.html',param=param)
@@ -125,26 +125,26 @@ def delboard(boardid):
     if 'username' in session.keys():
         ret = restapi.get('http://localhost:5000/lct/api/v1.0/boards/'+boardid)
         if ret['response'] == 0:
-            param['errormsg'] = 'No contact with backend'
+            param['ctrl']['errormsg'] = 'No contact with backend'
             return render_template('error.html', param=param)
         if not ret['response'] == 200:
-            param['errormsg'] = 'No such board'
+            param['ctrl']['errormsg'] = 'No such board'
             return render_template('login.html', param=param)
         if not ret['datalist'][0]['user'] == session['username']:
-            param['errormsg'] = 'Can not delete anyone else board'
+            param['ctrl']['errormsg'] = 'Can not delete anyone else board'
             return render_template('error.html', param=param)
         else:
             ret = restapi.delete('http://localhost:5000/lct/api/v1.0/boards/' + boardid)
             if ret['response'] == 0:
-                param['errormsg'] = 'No contact with backend'
+                param['ctrl']['errormsg'] = 'No contact with backend'
                 return render_template('error.html', param=param)
             if not ret['response'] == 201:
-                param['errormsg'] = 'No such board'
+                param['ctrl']['errormsg'] = 'No such board'
                 return render_template('error.html', param=param)
             else:
                 return redirect(url_for('index'))
     else:
-        param['errormsg'] = 'You need to be logged in to delete a board'
+        param['ctrl']['errormsg'] = 'You need to be logged in to delete a board'
         return render_template('error.html', param=param)
 
 
@@ -180,7 +180,7 @@ def newtopic(boardid):
         if restapi.post('http://localhost:5000/lct/api/v1.0/boards/'+boardid+'/topics', data):
             return redirect(url_for('board',boardid=boardid))
         else:
-            param['errormsg'] = 'No contact with backend'
+            param['ctrl']['errormsg'] = 'No contact with backend'
             return render_template('error.html', param=param)
     else:
         return render_template('newtopic.html',param=param)
@@ -196,26 +196,26 @@ def deltopic(boardid, topicid):
 
         ret = restapi.get('http://localhost:5000/lct/api/v1.0/boards/'+boardid+'/topics/'+topicid)
         if ret['response'] == 0:
-            param['errormsg'] = 'No contact with backend'
+            param['ctrl']['errormsg'] = 'No contact with backend'
             return render_template('error.html', param=param)
         if not ret['response'] == 200:
-            param['errormsg'] = 'No such topic'
+            param['ctrl']['errormsg'] = 'No such topic'
             return render_template('error.html', param=param)
         if not ret['datalist'][0]['user'] == session['username']:
-            param['errormsg'] = 'Can not delete anyone else topic'
+            param['ctrl']['errormsg'] = 'Can not delete anyone else topic'
             return render_template('error.html', param=param)
         else:
             ret = restapi.delete('http://localhost:5000/lct/api/v1.0/boards/'+boardid+'/topics/'+topicid)
             if ret['response'] == 0:
-                param['errormsg'] = 'No contact with backend'
+                param['ctrl']['errormsg'] = 'No contact with backend'
                 return render_template('error.html', param=param)
             if not ret['response'] == 201:
-                param['errormsg'] = 'No such board'
+                param['ctrl']['errormsg'] = 'No such board'
                 return render_template('error.html', param=param)
             else:
                 return redirect(url_for('board',boardid=boardid))
     else:
-        param['errormsg'] = 'You need to be logged in to delete a board'
+        param['ctrl']['errormsg'] = 'You need to be logged in to delete a board'
         return render_template('error.html', param=param)
 
 
