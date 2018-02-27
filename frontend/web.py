@@ -242,4 +242,4 @@ if __name__ == '__main__':
     sess.init_app(app)
 
     restapi = rest.CurlREST()
-    app.run(debug=True, host='192.168.0.200', port=5050)
+    app.run(debug=True, host='127.0.0.1', port=5050)
