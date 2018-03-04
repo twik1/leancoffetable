@@ -4,52 +4,51 @@
 <head>
     <title>Lean Coffee Table</title>
     <meta charset="utf-8">
-    <link href='http://fonts.googleapis.com/css?family=Aldrich' rel='stylesheet' type='text/css'>
-    <link href='http://fonts.googleapis.com/css?family=Roboto' rel='stylesheet' type='text/css'>
-
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://bootswatch.com/4/lux/bootstrap.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tempusdominus-bootstrap-4/5.0.0-alpha16/css/tempusdominus-bootstrap-4.min.css">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/lct.css') }}">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.1/css/font-awesome.min.css">
+    <link href='http://fonts.googleapis.com/css?family=Aldrich' rel='stylesheet' type='text/css'/>
+    <link href='http://fonts.googleapis.com/css?family=Roboto' rel='stylesheet' type='text/css'/>
 
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/tempusdominus-bootstrap-4/5.0.0-alpha16/js/tempusdominus-bootstrap-4.min.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.1/css/font-awesome.min.css"/>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/lct.css') }}"/>
 </head>
 
 <body>
 
-    <div class="bs-component">
-        <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-            <a class="navbar-brand" href="#">lean Coffee Table</a>
-            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarColor01" aria-controls="navbarColor01" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarColor01">
-                <ul class="navbar-nav ml-auto">
-                    <a class="btn btn-primary" href={{ url_for( 'index') }}>Home</a>
-                    {% if param['ctrl']['loggedin'] == 'yes' %}
-                    <a class="btn btn-primary" href={{ url_for( 'logout') }}>Logout</a> 
-                    {% else %}
-                    <a class="btn btn-primary" href={{ url_for( 'login') }}>Login</a> 
-                    {% endif %}
-                    <a class="btn btn-primary" href="#">About</a>
-                </ul>
-            </div>
-        </nav>
-    </div>
-
-    <div class="row">
-        <div class="col-lg-12">
-            <!--        <button type="button" class="btn btn-success float-right">Add new board</button> -->
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container-fluid">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar-collapse-3">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="#">Lean Coffee Table</a>
         </div>
-    </div>
+
+
+        <div class="collapse navbar-collapse" id="navbar-collapse-3">
+          <ul class="nav navbar-nav navbar-right">
+            <li><a href="{{ url_for('index') }}">Home</a></li>
+            {% if param['ctrl']['loggedin'] == 'yes' %}
+            <li><a href="{{ url_for('logout') }}">Logout</a></li>
+            {% else %}
+            <li><a href="{{ url_for('login') }}">Login</a></li>
+            {% endif %}
+            <li><a href="#">About</a></li>
+          </ul>
+        </div>
+      </div>
+    </nav>
 
     <div class="container">
         <form class="form-horizontal" role="form" method="POST">
             <div class="row">
-                <div class="col-md-3"></div>
+                <div class="col-md-4"></div>
                 <div class="col-md-6">
                     <h2>Add new board</h2>
                     <hr>
@@ -57,7 +56,7 @@
             </div>
 
             <div class="row">
-                <div class="col-md-3">
+                <div class="col-md-4">
                     <label for="inputboard">Board name</label>
                 </div>
                 <div class="col-md-6">
@@ -71,7 +70,7 @@
             </div>
 
             <div class="row">
-                <div class="col-md-3">
+                <div class="col-md-4">
                     <label for="startdate">Start date</label>
                 </div>
                 <div class="col-md-6">
@@ -85,17 +84,21 @@
             </div>
             <input type="hidden" name="username" value="{{ param['ctrl']['sessionname'] }}" />
             <div class="row" style="padding-top: 1rem">
-                <div class="col-md-3"></div>
+                <div class="col-md-4"></div>
                 <div class="col-md-6">
                     <button type="submit" class="btn btn-success"><i class="fa fa-sign-in"></i> Submit</button>
                 </div>
             </div>
         </form>
     </div>
-    <footer class="footer">
-        <p>twik.duckdns.org</p>
-    </footer>
 
+    <footer class="footer">
+        {% if 'sessionname' in param['ctrl'] %}
+            <p>{{ param['ctrl']['sessionname'] }} Logged in</p>
+        {% else %}
+            <p>No one logged in</p>
+        {% endif %}
+    </footer>
 
 </body>
 

@@ -5,17 +5,20 @@
 <head>
     <title>Lean Coffee Table</title>
     <meta charset="utf-8">
+    <title>Lean Coffee Table</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <link href='http://fonts.googleapis.com/css?family=Aldrich' rel='stylesheet' type='text/css'/>
     <link href='http://fonts.googleapis.com/css?family=Roboto' rel='stylesheet' type='text/css'/>
-    
-    <meta name="viewport" content="width=device-width, initial-scale=1"/>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"/>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@3.5.2/animate.min.css"/>
-    <link rel="stylesheet" href="https://bootswatch.com/4/lux/bootstrap.min.css"/>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/lct.css') }}"/>
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.1/css/font-awesome.min.css"/>
 
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/lct.css') }}"/>
     <script>
         function newtopic(boardid) {
             var url = '{{ url_for('newtopic', boardid='') }}';
@@ -31,37 +34,126 @@
 </head>
       
 <body>
-    <div class="bs-component">
-        <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-            <a class="navbar-brand" href="#">lean Coffee Table</a>
-            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarColor01" aria-controls="navbarColor01" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarColor01">
-                <ul class="navbar-nav ml-auto">
-                    <a class="btn btn-primary" href={{ url_for('index') }}>Home</a>
-                    {% if param['ctrl']['loggedin'] == 'yes' %}
-                        <a class="btn btn-primary" href={{ url_for('logout') }}>Logout</a>
-                    {% else %}
-                        <a class="btn btn-primary" href={{ url_for('login') }}>Login</a>
-                    {% endif %}
-                    <a class="btn btn-primary" href="#">About</a>
-                </ul>
-            </div>
-        </nav>
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container-fluid">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar-collapse-3">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="#">Lean Coffee Table</a>
+        </div>
+
+
+        <div class="collapse navbar-collapse" id="navbar-collapse-3">
+          <ul class="nav navbar-nav navbar-right">
+            <li><a href="{{ url_for('index') }}">Home</a></li>
+            {% if param['ctrl']['loggedin'] == 'yes' %}
+            <li><a href="{{ url_for('logout') }}">Logout</a></li>
+            {% else %}
+            <li><a href="{{ url_for('login') }}">Login</a></li>
+            {% endif %}
+            <li><a href="#">About</a></li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container-fluid" id="addbutton">
+        {% if param['ctrl']['loggedin'] == 'yes' %}
+        <button type="button" class="btn btn-success pull-right" onclick="location.href='{{ url_for('newtopic',boardid=param['ctrl']['boardid']) }}';">Add new topic</button>
+        {% else %}
+        <button type="button" class="btn btn-success pull-right disabled" disabled="disabled" onclick="location.href='{{ url_for('newtopic',boardid=param['ctrl']['boardid']) }}';">Add new topic</button>
+        {% endif %}
     </div>
 
-    <div class="row">
-        <div class="col-lg-12">
-            {% if param['ctrl']['loggedin'] == 'yes' %}
-            <button type="button" class="btn btn-success float-right" onclick="newtopic( {{ param['ctrl']['boardid'] }} )">Add new topic</button>
-            {% else %}
-            <button type="button" class="btn btn-success float-right disabled" disabled="disabled" onclick="newtopic( {{ param['ctrl']['boardid'] }} )">Add new topic</button>
-            {% endif %}
+
+    <div class="container-fluid">
+	    <div class="row">
+            {% for topic in param['data'] %}
+	            <div class="col-md-3 col-sm-4">
+                    <div class="card" style="width: 25rem;">
+                        <a href="#" id="nodec">
+                            <div class="card-img-top" style="background-color:rgba(187, 120, 36, 0.1) " id="topimg">
+                                <center><i class="fa fa-edit" style="color:#BB7824"></i></center>
+                            </div>
+                            <div class="card-block">
+                                <h4 class="card-title">{{ topic['heading'] }}</h4>
+                                <p class="card-text">{{ topic['description'] }}</p>
+                                <p class="card-text">{{ topic['numvote'] }} Votes
+                                    {% if 'sessionname' in param['ctrl'] %}
+                                        {% if param['ctrl']['sessionname'] == topic['user'] %}
+                                            <a href="#" class="btn confirmdel tooltips" data-id="{{ url_for('deltopic', boardid=topic['boardid'],topicid=topic['topicid']) }}" title="Delete">
+                                                <span class="fa fa-trash-o"></span>
+                                            </a>
+                                        {% endif %}
+                                    {% endif %}
+                                    {% if 'thumbsup' in topic %}
+                                        <a href="#" class="btn tooltips" onclick="location.href='{{ url_for('delvote',boardid=topic['boardid'],topicid=topic['topicid'],voteid=topic['thumbsup']) }}';" title="Delete">
+                                            <span class="fa fa-thumbs-up"></span>
+                                        </a>
+                                    {% else %}
+                                        <a href="#" class="btn tooltips" onclick="location.href='{{ url_for('newvote',boardid=topic['boardid'],topicid=topic['topicid']) }}';" title="Delete">
+                                            <span class="fa fa-thumbs-down"></span>
+                                        </a>
+                                    {% endif %}
+                                </p>
+                                <br>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            {% endfor %}
         </div>
     </div>
 
+    <!--
+<div class="container-fluid">
+	<div class="row">
+        {% for topic in param['data'] %}
+	    <div class="col-md-3 col-sm-4">
+	        <div class="wrimagecard wrimagecard-topimage" id="box">
+                <a href="#">
+                    <div class="wrimagecard-topimage_header" style="background-color:rgba(187, 120, 36, 0.1) ">
+                        <center><i class="fa fa-comments" style="color:#BB7824"></i></center>
+                    </div>
+                    <div class="wrimagecard-topimage_title">
+                        <h4>{{ topic['heading'] }}</h4>
+                        <p>{{ topic['description'] }}
+                            {% if 'sessionname' in param['ctrl'] %}
+                                {% if param['ctrl']['sessionname'] == topic['user'] %}
+                                    <a class="tooltips pull-right" data-toggle="tooltip" data-placement="top" title="Delete">
+                                        <button type="button" onclick="location.href='{{ url_for('deltopic', boardid=topic['boardid'],topicid=topic['topicid']) }}';" style="border: 0; background: none;">
+                                            <i class="fa fa-trash-o" aria-hidden="true" id="trash"></i>
+                                        </button>
+                                    </a>
+                                {% endif %}
+                            {% endif %}
+                            <a class="tooltips pull-right" data-toggle="tooltip" data-placement="top" title="Vote">
+                                {% if 'thumbsup' in topic %}
+                                    <button type="button" onclick="location.href='{{ url_for('delvote',boardid=topic['boardid'],topicid=topic['topicid'],voteid=topic['thumbsup']) }}'" style="border: 0; background: none;">
+                                        <i class="fa fa-thumbs-up" aria-hidden="true" id="trash"></i>
+                                    </button>
+                                {% else %}
+                                    <button type="button" onclick="location.href='{{ url_for('newvote',boardid=topic['boardid'],topicid=topic['topicid']) }}'" style="border: 0; background: none;">
+                                        <i class="fa fa-thumbs-down" aria-hidden="true" id="trash"></i>
+                                    </button>
+                                {% endif %}
+                            </a>
+                        </p>
+                        <p class="card-text">{{ topic['numvote'] }} Votes</p>
+                    </div>
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+ </div>
+-->
 
+    <!--
     <div class="card-group">
 
         {% for topic in param['data'] %}
@@ -99,12 +191,29 @@
         {% endfor %}
 
     </div>
+    -->
 
     <footer class="footer">
-        <p>twik.duckdns.org</p>
+        {% if 'sessionname' in param['ctrl'] %}
+            <p>{{ param['ctrl']['sessionname'] }} Logged in</p>
+        {% else %}
+            <p>No one logged in</p>
+        {% endif %}
     </footer>
- 
- 
+
+    <script src="http://rawgithub.com/makeusabrew/bootbox/master/bootbox.js"></script>
+    <script>
+        $(document).on("click", ".confirmdel", function(e) {
+            var url = $(this).attr("data-id");
+
+            bootbox.confirm("Are you sure?", function(result) {
+                if (result) {
+                    window.location.href=url
+                }
+            });
+        });
+    </script>
+
 </body>
  
 </html>
