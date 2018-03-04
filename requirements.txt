@@ -9,6 +9,8 @@ idna==2.6
 itsdangerous==0.24
 Jinja2==2.10
 MarkupSafe==1.0
+passlib==1.7.1
+pkg-resources==0.0.0
 PyJWT==1.5.3
 pykwalify==1.6.0
 PyMySQL==0.8.0
