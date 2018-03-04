@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, session
 import rest
 from flask.ext.session import Session
-
+from passlib.hash import pbkdf2_sha256
 
 app = Flask(__name__)
 sess = Session()
@@ -39,7 +39,8 @@ def login():
             param['ctrl']['errormsg'] = 'Faulty user or password'
             return render_template('login.html', param=param)
         else:
-            if ret['datalist'][0]['password'] == request.form['password']:
+            #if ret['datalist'][0]['password'] == request.form['password']:
+            if pbkdf2_sha256.verify(request.form['password'], ret['datalist'][0]['password']):
                 session['username'] = request.form['user']
                 param['ctrl']['loggedin'] = 'yes'
                 return redirect(url_for('index'))
@@ -72,7 +73,8 @@ def newuser():
     if request.method == 'POST':
         user = request.form['user']
         name = request.form['name']
-        password = request.form['password']
+        password = pbkdf2_sha256.encrypt(request.form['password'], rounds=200000, salt_size=16)
+
         data = {'user': user,'name':name, 'password':password}
         ret = restapi.post('http://localhost:5000/lct/api/v1.0/users', data)
         if ret['response'] == 0:
