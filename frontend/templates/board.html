@@ -89,15 +89,15 @@
                                                 <span class="fa fa-trash-o"></span>
                                             </a>
                                         {% endif %}
-                                    {% endif %}
-                                    {% if 'thumbsup' in topic %}
-                                        <a href="#" class="btn tooltips" onclick="location.href='{{ url_for('delvote',boardid=topic['boardid'],topicid=topic['topicid'],voteid=topic['thumbsup']) }}';" title="Delete">
-                                            <span class="fa fa-thumbs-up"></span>
-                                        </a>
-                                    {% else %}
-                                        <a href="#" class="btn tooltips" onclick="location.href='{{ url_for('newvote',boardid=topic['boardid'],topicid=topic['topicid']) }}';" title="Delete">
-                                            <span class="fa fa-thumbs-down"></span>
-                                        </a>
+                                        {% if 'thumbsup' in topic %}
+                                            <a href="#" class="btn tooltips" onclick="location.href='{{ url_for('delvote',boardid=topic['boardid'],topicid=topic['topicid'],voteid=topic['thumbsup']) }}';" title="Delete">
+                                                <span class="fa fa-thumbs-up"></span>
+                                            </a>
+                                        {% else %}
+                                            <a href="#" class="btn tooltips" onclick="location.href='{{ url_for('newvote',boardid=topic['boardid'],topicid=topic['topicid']) }}';" title="Delete">
+                                                <span class="fa fa-thumbs-down"></span>
+                                            </a>
+                                        {% endif %}
                                     {% endif %}
                                 </p>
                                 <br>
@@ -108,90 +108,6 @@
             {% endfor %}
         </div>
     </div>
-
-    <!--
-<div class="container-fluid">
-	<div class="row">
-        {% for topic in param['data'] %}
-	    <div class="col-md-3 col-sm-4">
-	        <div class="wrimagecard wrimagecard-topimage" id="box">
-                <a href="#">
-                    <div class="wrimagecard-topimage_header" style="background-color:rgba(187, 120, 36, 0.1) ">
-                        <center><i class="fa fa-comments" style="color:#BB7824"></i></center>
-                    </div>
-                    <div class="wrimagecard-topimage_title">
-                        <h4>{{ topic['heading'] }}</h4>
-                        <p>{{ topic['description'] }}
-                            {% if 'sessionname' in param['ctrl'] %}
-                                {% if param['ctrl']['sessionname'] == topic['user'] %}
-                                    <a class="tooltips pull-right" data-toggle="tooltip" data-placement="top" title="Delete">
-                                        <button type="button" onclick="location.href='{{ url_for('deltopic', boardid=topic['boardid'],topicid=topic['topicid']) }}';" style="border: 0; background: none;">
-                                            <i class="fa fa-trash-o" aria-hidden="true" id="trash"></i>
-                                        </button>
-                                    </a>
-                                {% endif %}
-                            {% endif %}
-                            <a class="tooltips pull-right" data-toggle="tooltip" data-placement="top" title="Vote">
-                                {% if 'thumbsup' in topic %}
-                                    <button type="button" onclick="location.href='{{ url_for('delvote',boardid=topic['boardid'],topicid=topic['topicid'],voteid=topic['thumbsup']) }}'" style="border: 0; background: none;">
-                                        <i class="fa fa-thumbs-up" aria-hidden="true" id="trash"></i>
-                                    </button>
-                                {% else %}
-                                    <button type="button" onclick="location.href='{{ url_for('newvote',boardid=topic['boardid'],topicid=topic['topicid']) }}'" style="border: 0; background: none;">
-                                        <i class="fa fa-thumbs-down" aria-hidden="true" id="trash"></i>
-                                    </button>
-                                {% endif %}
-                            </a>
-                        </p>
-                        <p class="card-text">{{ topic['numvote'] }} Votes</p>
-                    </div>
-                </a>
-            </div>
-        </div>
-        {% endfor %}
-    </div>
- </div>
--->
-
-    <!--
-    <div class="card-group">
-
-        {% for topic in param['data'] %}
-        <div class="col m4">
-            <div class="card" style="width: 18rem;">
-                <div class="card-header">
-                    <h5 class="card-title">{{ topic['heading'] }}</h5>
-                </div>
-                <div class="card-body">
-                    <p class="card-text">{{ topic['description'] }}</p>
-                    {% if 'sessionname' in param['ctrl'] %}
-                        {% if param['ctrl']['sessionname'] == topic['user'] %}
-                            <a class="tooltips" data-toggle="tooltip" data-placement="top" title="Delete">
-                            <button type="button" onclick="deltopic( {{ topic['topicid'] }} )" style="border: 0; background: none;">
-                                <i class="fa fa-trash-o fa-2x" aria-hidden="true"></i>
-                            </button>
-                            </a>
-                        {% endif %}
-                    {% endif %}
-                    <a class="tooltips" data-toggle="tooltip" data-placement="top" title="Vote">
-                        {% if 'thumbsup' in topic %}
-                        <button type="button" onclick="location.href='{{ url_for('delvote',boardid=topic['boardid'],topicid=topic['topicid'],voteid=topic['thumbsup']) }}'" style="border: 0; background: none;">
-                            <i class="fa fa-thumbs-up fa-2x" aria-hidden="true"></i>
-                        </button>
-                        {% else %}
-                        <button type="button" onclick="location.href='{{ url_for('newvote',boardid=topic['boardid'],topicid=topic['topicid']) }}'" style="border: 0; background: none;">
-                            <i class="fa fa-thumbs-down fa-2x" aria-hidden="true"></i>
-                        </button>
-                        {% endif %}
-                    </a>
-                    <p class="card-text">{{ topic['numvote'] }} Votes</p>
-                </div>
-            </div>
-        </div>
-        {% endfor %}
-
-    </div>
-    -->
 
     <div class="navbar navbar-default navbar-fixed-bottom">
         <div class="container">

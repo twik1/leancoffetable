@@ -76,7 +76,8 @@ class CurlREST:
                 if 'datalist' in vids:
                     for ids in vids['datalist']:
                         vote = self.get(self.baseurl+"boards/"+boardid+'/topics/'+str(id['topicid'])+'/votes/'+str(ids['voteid']))
-                        if 'datalist' in vote:
+                        #if 'datalist' in vote:
+                        if 'sessionname' in datastore['ctrl']:
                             if datastore['ctrl']['sessionname'] == vote['datalist'][0]['user']:
                                 datastore['data'][index]['thumbsup'] = str(ids['voteid'])
                         numvote = numvote + 1
