@@ -84,3 +84,10 @@ class CurlREST:
                 datastore['data'][index]['numvote'] = numvote
                 index = index + 1
         return datastore
+
+    def checkuser(self, user):
+        ids = self.get(self.baseurl + "users/" + user)
+        if ids['response'] == 200:
+            return True
+        else:
+            return False

@@ -74,7 +74,9 @@ def newuser():
         user = request.form['user']
         name = request.form['name']
         password = pbkdf2_sha256.encrypt(request.form['password'], rounds=200000, salt_size=16)
-
+        if restapi.checkuser(user):
+            param['ctrl']['errormsg'] = 'User already exist'
+            return render_template('newuser.html', param=param)
         data = {'user': user,'name':name, 'password':password}
         ret = restapi.post('http://localhost:5000/lct/api/v1.0/users', data)
         if ret['response'] == 0:
@@ -85,7 +87,6 @@ def newuser():
             param['ctrl']['loggedin'] = 'yes'
             param['ctrl']['sessionname'] = session['username']
             return redirect(url_for('index', param=param))
-            #return render_template('index.html', param=param)
     else:
         return render_template('newuser.html', param=param)
 
