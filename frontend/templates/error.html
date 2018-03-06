@@ -46,21 +46,34 @@
       </div>
     </nav>
 
+    <!--
     <div class="row">
         {% if 'errormsg' in param['ctrl'] %}
         <div class="col-lg-12"> <h2> {{ param['ctrl']['errormsg'] }} </h2> </div>
         {% endif %}
     </div>
-    
+    -->
 
-    <footer class="footer">
-        {% if 'sessionname' in param['ctrl'] %}
-            <p>{{ param['ctrl']['sessionname'] }} Logged in</p>
-        {% else %}
-            <p>No one logged in</p>
+    <div class="container-fluid">
+        <br>
+        {% if 'errormsg' in param['ctrl'] %}
+            <div class="alert alert-danger">
+                <strong><i class="fa fa-close fa-lg"></i> </strong>{{ param['ctrl']['errormsg'] }}
+            </div>
         {% endif %}
-    </footer>
- 
+    </div>
+
+    <div class="navbar navbar-default navbar-fixed-bottom">
+        <div class="container">
+            {% if 'sessionname' in param['ctrl'] %}
+                <p class="navbar-text pull-left">{{ param['ctrl']['sessionname'] }} Logged in</p>
+            {% else %}
+                <p class="navbar-text pull-left">No one logged in</p>
+            {% endif %}
+
+        </div>
+    </div>
+
 </body>
  
 </html>

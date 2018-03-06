@@ -193,13 +193,16 @@
     </div>
     -->
 
-    <footer class="footer">
-        {% if 'sessionname' in param['ctrl'] %}
-            <p>{{ param['ctrl']['sessionname'] }} Logged in</p>
-        {% else %}
-            <p>No one logged in</p>
-        {% endif %}
-    </footer>
+    <div class="navbar navbar-default navbar-fixed-bottom">
+        <div class="container">
+            {% if 'sessionname' in param['ctrl'] %}
+                <p class="navbar-text pull-left">{{ param['ctrl']['sessionname'] }} Logged in</p>
+            {% else %}
+                <p class="navbar-text pull-left">No one logged in</p>
+            {% endif %}
+
+        </div>
+    </div>
 
     <script src="http://rawgithub.com/makeusabrew/bootbox/master/bootbox.js"></script>
     <script>
