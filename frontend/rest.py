@@ -8,6 +8,9 @@ class CurlREST:
         self.baseurl = 'http://localhost:5000/lct/api/v1.0/'
 
     def sortlist(self, list):
+        if len(list) == 0:
+            #Nothing to sort
+            return list
         newlist = []
         i = 0
         j = 0
