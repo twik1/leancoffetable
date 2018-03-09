@@ -75,7 +75,7 @@
                                 {% if 'sessionname' in param['ctrl'] %}
                                     {% if param['ctrl']['sessionname'] == board['user'] %}
                                     <a href="#" class="btn confirmdel tooltips" data-id="{{ url_for('delboard', boardid=board['boardid']) }}" title="Delete">
-                                        <span class="fa fa-trash-o"></span>
+                                        <span class="fa fa-trash-o fa-lg"></span>
                                     </a>
                                     {% endif %}
                                 {% endif %}
