@@ -237,6 +237,15 @@ def delvote(boardid, topicid, voteid):
     return redirect(url_for('board', boardid=boardid))
 
 
+@app.route('/about.html',methods=['GET'])
+def about():
+    param = {}
+    param ['ctrl'] ={}
+    if 'username' in session.keys():
+        param['ctrl']['loggedin'] = 'yes'
+        param['ctrl']['sessionname'] = session['username']
+    return render_template('about.html', param=param)
+
 
 if __name__ == '__main__':
     app.secret_key = 'super secret key'

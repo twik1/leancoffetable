@@ -1,6 +1,7 @@
+
 <!DOCTYPE html>
 <html lang="en">
-
+ 
 <head>
     <title>Lean Coffee Table</title>
     <meta charset="utf-8">
@@ -15,7 +16,7 @@
 
     <link rel="stylesheet" href="{{ url_for('static', filename='css/lct.css') }}"/>
 </head>
-
+      
 <body>
 
     <nav class="navbar navbar-inverse navbar-fixed-top">
@@ -46,47 +47,17 @@
     </nav>
 
     <div class="container-fluid">
-        <form class="form-horizontal" role="form" method="POST">
-            <div class="row">
-                <div class="col-md-5"></div>
-                <div class="col-md-3">
-                    <h2>Add new board</h2>
-                    <br>
-                </div>
-                <div class="col-md-4"></div>
-            </div>
+        <div class="page-header">
+            <h1>About Lean Coffee Table</h1>
+            <p class="lead">The story about Lean Coffee Table.</p>
+        </div>
+        <!--
+        <p>The challenge got to tempting to reject</p>
+        <p>Now I finally found an excuse to program python,</p>
+        <p>I've always wanted to try the flask framework</p>
+        <p>And how do I code a RESTful API</p>
+        -->
 
-            <div class="row">
-                <div class="form-group has-danger">
-                    <div class="col-md-3"></div>
-                    <label class="control-lable col-md-1" for="inputboard">Board name</label>
-                    <div class="input-group col-md-3">
-                        <div class="input-group-addon" style="width: 2.6rem"><i class="fas fa-heading"></i></div>
-                        <input type="text" class="form-control" name="boardname" id="inputboard" placeholder="Board name" required autofocus>
-                    </div>
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="form-group has-danger">
-                    <div class="col-md-3"></div>
-                    <label class="control-lable col-md-1" for="startdate">Start date</label>
-                    <div class="input-group col-md-3">
-                        <div class="input-group-addon" style="width: 2.6rem"><i class="fas fa-heading"></i></div>
-                        <input type="datetime-local" class="form-control" name="startdate" id="startdate" placeholder="Start date">
-                    </div>
-                </div>
-            </div>
-
-            <input type="hidden" name="username" value="{{ param['ctrl']['sessionname'] }}" />
-
-            <div class="row" style="padding-top: 1rem">
-                <div class="col-md-4"></div>
-                <div class="col-md-6">
-                    <button type="submit" class="btn btn-success"><i class="fa fa-sign-in"></i> Submit</button>
-                </div>
-            </div>
-        </form>
     </div>
 
     <div class="navbar navbar-default navbar-fixed-bottom">
@@ -101,5 +72,7 @@
     </div>
 
 </body>
-
+ 
 </html>
+
+
