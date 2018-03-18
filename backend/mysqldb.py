@@ -46,6 +46,7 @@ class DBMySQL:
 
     def get_user(self, user):
         uservalues = []
+        usertup = ()
         sql = "SELECT * FROM user WHERE user = '%s'" % user
         usertup = self.db_get(sql)
         if len(usertup):
@@ -81,6 +82,7 @@ name='%s',password='%s',created=null,updated=null" % \
 
     def get_boards(self):
         boardlist = []
+        boardtup = ()
         sql = "SELECT * FROM board"
         boardtup = self.db_get(sql)
         for board in boardtup:
