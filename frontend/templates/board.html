@@ -80,8 +80,12 @@
                                 <center><i class="fa fa-comments" style="color:#16A085"></i></center>
                             </div>
                             <div class="card-block">
-                                <h4 class="card-title">{{ topic['heading'] }}</h4>
-                                <p class="card-text">{{ topic['description'] }}</p>
+                                <div style="height: 2rem;">
+                                    <h4 style="text-overflow: ellipsis;overflow: hidden;white-space: nowrap;">{{ topic['heading'] }}</h4>
+                                </div>
+                                <div style="height: 8rem;text-overflow: ellipsis;overflow: hidden;">
+                                    <p style="text-overflow: ellipsis;overflow: hidden;">{{ topic['description'] }}</p>
+                                </div>
                                 <p class="card-text">{{ topic['numvote'] }} Votes
                                     {% if 'sessionname' in param['ctrl'] %}
                                         {% if param['ctrl']['sessionname'] == topic['user'] %}

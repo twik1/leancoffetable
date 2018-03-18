@@ -7,7 +7,6 @@ body {
 #addbutton {
     margin-bottom: 1rem;
 }
-
 #trash {
     font-size:  20px;
 }
@@ -21,7 +20,7 @@ body {
     top: 1; left: 1;
     height: 99%; width: 99%;
 }
-#topimg{
+#topimg {
     font-size:  60px;
 }
 #nodec {
@@ -38,7 +37,7 @@ body {
         margin: 20px 0;
     }
 }
-  .card{
+.card {
 	margin-top: 0;
     margin-bottom: 1.5rem;
     text-align: left;
@@ -54,4 +53,13 @@ body {
 .row {
   margin-left: 0px;
   margin-right: 0px;
+}
+#cardbody p {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    max-width: 100px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    height:56px /* fallback */
 }
