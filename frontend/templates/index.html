@@ -70,16 +70,20 @@
                             <center><i class="fa fa-edit" style="color:#BB7824"></i></center>
                         </div>
                         <div class="card-block">
-                            <h4 class="card-title">{{ board['name'] }}</h4>
-                            <p class="card-text">{{ board['date'] }}
-                                {% if 'sessionname' in param['ctrl'] %}
-                                    {% if param['ctrl']['sessionname'] == board['user'] %}
-                                    <a href="#" class="btn confirmdel tooltips" data-id="{{ url_for('delboard', boardid=board['boardid']) }}" title="Delete">
-                                        <span class="fa fa-trash-o fa-lg"></span>
-                                    </a>
+                            <div style="height: 2rem;">
+                                <h4 style="text-overflow: ellipsis;overflow: hidden;white-space: nowrap;">{{ board['name'] }}</h4>
+                            </div>
+                            <div style="height: 5rem;text-overflow: ellipsis;overflow: hidden;">
+                                <p class="card-text">{{ board['date'] }}
+                                    {% if 'sessionname' in param['ctrl'] %}
+                                        {% if param['ctrl']['sessionname'] == board['user'] %}
+                                            <a href="#" class="btn confirmdel tooltips" data-id="{{ url_for('delboard', boardid=board['boardid']) }}" title="Delete">
+                                                <span class="fa fa-trash-o fa-lg"></span>
+                                            </a>
+                                        {% endif %}
                                     {% endif %}
-                                {% endif %}
-                            </p><br>
+                                </p><br>
+                            </div>
                         </div>
                     </a>
                 </div>
