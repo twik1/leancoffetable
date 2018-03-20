@@ -11,6 +11,7 @@ class DBMySQL:
 
 
     def db_set(self, sql):
+        self.db.ping(reconnect=True)
         try:
             # Execute the SQL command
             self.cursor.execute(sql)
