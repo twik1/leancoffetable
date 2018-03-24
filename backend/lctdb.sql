@@ -20,6 +20,7 @@ CREATE TABLE board (
 	name CHAR(128) NOT NULL,
 	user CHAR(80) NOT NULL,
 	startdate DATETIME,
+	votenum INT,
 	created TIMESTAMP DEFAULT '0000-00-00 00:00:00',
 	updated TIMESTAMP DEFAULT now() ON UPDATE now(),
 	FOREIGN KEY (user) REFERENCES user (user) ON DELETE CASCADE,

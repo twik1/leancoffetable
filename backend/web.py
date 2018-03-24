@@ -104,7 +104,7 @@ def get_boards():
 @app.route('/lct/api/v1.0/boards', methods=['POST'])
 def add_board():
     dbconnect.conn()
-    if not check_result(['boardname','username','startdate']):
+    if not check_result(['boardname','username','startdate','votenum']):
         gabort("Missing parameter", 404)
     if not dbconnect.check_user(request.json['username']):
         gabort("No such user", 404)
@@ -114,6 +114,7 @@ def add_board():
         'username': request.json['username'],
         'boardname': request.json['boardname'],
         'startdate': startdate,
+        'votenum': request.json['votenum']
         }
     dbconnect.add_board(board)
     dbconnect.disconn()
@@ -133,17 +134,18 @@ def get_board(boardid):
 @app.route('/lct/api/v1.0/boards/<boardid>', methods=['PUT'])
 def update_board(boardid):
     dbconnect.conn()
-    if not check_result(['boardname','username']):
+    if not check_result(['boardname','username','startdate','votenum']):
         gabort("Missing parameter", 404)
     if not dbconnect.check_board(boardid):
         gabort("No such board", 404)
     if not dbconnect.check_user(request.json['user']):
         gabort("No such user", 404)
     board = {
-        'boardname': request.json['boardname'],
         'username': request.json['username'],
-        'startdate': request.json['startdate'],
-        'boardid': boardid,
+        'boardname': request.json['boardname'],
+        'startdate': startdate,
+        'votenum': request.json['votenum'],
+        'boardid': boardid
     }
     dbconnect.update_board(board)
     dbconnect.disconn()
