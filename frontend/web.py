@@ -107,6 +107,8 @@ def newboard():
         boardname = request.form['boardname']
         startdate = request.form['startdate']
         votenum = request.form['votenum']
+        if votenum == 'Unlimited':
+            votenum = '0'
         if startdate == '':
             startdate = '1970-01-01T00:00'
         data = {'username':username,'boardname':boardname,'startdate':startdate,'votenum':votenum}
@@ -256,4 +258,4 @@ if __name__ == '__main__':
     sess.init_app(app)
 
     restapi = rest.CurlREST()
-    app.run(debug=True, host='127.0.0.1', port=5050)
+    app.run(debug=True, host='192.168.0.200', port=5050)

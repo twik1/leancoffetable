@@ -68,6 +68,23 @@
             </div>
 
             <div class="row">
+               <div class="form-group has-danger">
+                    <div class="col-md-3"></div>
+                    <label class="control-lable col-md-1" for="startdate">Number of votes</label>
+                    <div class="input-group col-md-3">
+                        <div class="input-group-addon" style="width: 2.6rem"><i class="fas fa-heading"></i></div>
+                        <select class="form-control pull-left" id="votenum" name="votenum">
+                            <option>Unlimited</option>
+                            <option>1</option>
+                            <option>3</option>
+                            <option>5</option>
+                            <option>10</option>
+                        </select>
+                    </div>
+               </div>
+            </div>
+
+            <div class="row">
                 <div class="form-group has-danger">
                     <div class="col-md-3"></div>
                     <label class="control-lable col-md-1" for="startdate">Start date</label>
@@ -79,7 +96,7 @@
             </div>
 
             <input type="hidden" name="username" value="{{ param['ctrl']['sessionname'] }}" />
-            <input type="hidden" name="votenum" value="0" />
+            <!--<input type="hidden" name="votenum" value="0" />-->
 
             <div class="row" style="padding-top: 1rem">
                 <div class="col-md-4"></div>
