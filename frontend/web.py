@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for, session
 import rest
-from flask.ext.session import Session
+from flask_session import Session
 from passlib.hash import pbkdf2_sha256
 
 app = Flask(__name__)
