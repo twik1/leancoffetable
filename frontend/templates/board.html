@@ -98,9 +98,11 @@
                                                 <span class="fa fa-thumbs-up fa-lg"></span>
                                             </a>
                                         {% else %}
+                                            {% if param['ctrl']['myvote'] < param['ctrl']['votenum'] or param['ctrl']['votenum'] == 0 %}
                                             <a href="#" class="btn tooltips" onclick="location.href='{{ url_for('newvote',boardid=topic['boardid'],topicid=topic['topicid']) }}';" title="Vote">
                                                 <span class="fa fa-thumbs-down fa-lg"></span>
                                             </a>
+                                            {% endif %}
                                         {% endif %}
                                     {% endif %}
                                 </p>

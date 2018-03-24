@@ -129,7 +129,7 @@ user='%s',name='%s',startdate='%s',votenum='%s',created=null,updated=null" % \
         boardtup = self.db_get(sql)
         if len(boardtup):
             boardtup = boardtup[0]
-            boardvalues.append({'boardid': boardtup[0], 'name': boardtup[1], 'user': boardtup[2], 'date':boardtup[3]})
+            boardvalues.append({'boardid': boardtup[0], 'name': boardtup[1], 'user': boardtup[2], 'date':boardtup[3],'votenum':boardtup[4]})
         return boardvalues
 
 

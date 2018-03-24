@@ -80,12 +80,14 @@ class CurlREST:
         datastore['data'] = []
         index = 0
         board = self.get(self.baseurl + 'boards/' + boardid)
+        datastore['ctrl']['votenum'] = board['datalist'][0]['votenum']
 #        if 'datalist' in board:
 #            datastore['ctrl']['user'] = board['datalist'][0]['user']
 
         ids = self.get(self.baseurl+"boards/"+boardid+'/topics')
         datastore['ctrl']['response'] = ids['response']
 
+        myvote = 0
         if 'datalist' in ids:
             for id in ids['datalist']:
                 thumbsup = 0
@@ -101,11 +103,13 @@ class CurlREST:
                         if 'sessionname' in datastore['ctrl']:
                             if datastore['ctrl']['sessionname'] == vote['datalist'][0]['user']:
                                 datastore['data'][index]['thumbsup'] = str(ids['voteid'])
+                                myvote = myvote + 1
                         numvote = numvote + 1
                 datastore['data'][index]['numvote'] = numvote
                 index = index + 1
         sortedlist = self.sortlist(datastore['data'])
         datastore['data'] = sortedlist
+        datastore['ctrl']['myvote'] = myvote
         return datastore
 
     def checkuser(self, user):
