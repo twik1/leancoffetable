@@ -6,12 +6,22 @@ import json
 
 class DBMySQL:
     def __init__(self, ip, usr, pwd, db):
-        self.db = pymysql.connect(ip,usr,pwd,db)
+        self.ip = ip
+        self.usr = usr
+        self.pwd = pwd
+        self.datbase = db
+
+
+    def conn(self):
+        self.db = pymysql.connect(self.ip,self.usr,self.pwd,self.datbase)
         self.cursor = self.db.cursor()
 
 
+    def disconn(self):
+        self.db.close()
+
+
     def db_set(self, sql):
-        self.db.ping(reconnect=True)
         try:
             # Execute the SQL command
             self.cursor.execute(sql)
