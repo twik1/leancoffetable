@@ -46,7 +46,8 @@ def add_user():
     user = {
         'user': request.json['user'],
         'name': request.json.get('name', ""),
-        'password': request.json['password']
+        'password': request.json['password'],
+        'mail': request.json['mail']
     }
     dbconnect.add_user(user)
     dbconnect.disconn()
@@ -66,14 +67,15 @@ def get_user(user):
 @app.route('/lct/api/v1.0/users/<user>', methods=['PUT'])
 def update_user(user):
     dbconnect.conn()
-    if not check_result(['password']):
+    if not check_result(['password','mail']):
         gabort("Missing parameter", 404)
     if not dbconnect.check_user(user):
         gabort("No such user", 404)
     user = {
         'user': user,
         'name': request.json.get('name', ""),
-        'password': request.json['password']
+        'password': request.json['password'],
+        'mail': request.json['mail']
     }
     dbconnect.add_user(user)
     dbconnect.disconn()

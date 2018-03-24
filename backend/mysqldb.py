@@ -62,7 +62,7 @@ class DBMySQL:
         usertup = self.db_get(sql)
         if len(usertup):
             usertup = usertup[0]
-            uservalues.append({'user': usertup[0], 'name': usertup[1], 'password': usertup[2]})
+            uservalues.append({'user': usertup[0], 'name': usertup[1], 'password': usertup[2],'mail': usertup[3]})
         return uservalues
 
 
@@ -76,10 +76,10 @@ class DBMySQL:
     def add_user(self, obj):
         # obj expected dictionary {user: 'user', name: 'name', password: 'password}
         sql = \
-              "INSERT INTO user(user,name,password,created,updated) \
-VALUES ('%s','%s','%s',null,null) ON DUPLICATE KEY UPDATE \
-name='%s',password='%s',created=null,updated=null" % \
-(obj['user'], obj['name'], obj['password'], obj['name'], obj['password'])
+              "INSERT INTO user(user,name,password,mail,created,updated) \
+VALUES ('%s','%s','%s','%s',null,null) ON DUPLICATE KEY UPDATE \
+name='%s',password='%s',mail='%s',created=null,updated=null" % \
+(obj['user'],obj['name'],obj['password'],obj['mail'],obj['name'],obj['password'],obj['mail'])
         self.db_set(sql)
 
 

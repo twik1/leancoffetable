@@ -10,6 +10,7 @@ CREATE TABLE user (
 	user CHAR(80) NOT NULL,
 	name CHAR(80) NOT NULL,
 	password VARCHAR(90) NOT NULL,
+	mail VARCHAR(320) NOT NULL,
 	created TIMESTAMP DEFAULT '0000-00-00 00:00:00',
 	updated TIMESTAMP DEFAULT now() ON UPDATE now(),
 	PRIMARY KEY (user)) engine = innodb;
