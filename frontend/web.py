@@ -92,6 +92,46 @@ def newuser():
         return render_template('newuser.html', param=param)
 
 
+@app.route('/user.html',methods=['GET', 'POST'])
+def user():
+    param = {}
+    param['data'] = []
+    param['ctrl'] = {}
+    if not 'username' in session.keys():
+        param['ctrl']['errormsg'] = 'You are not logged in'
+        return render_template('error.html', param=param)
+    param['ctrl']['loggedin'] = 'yes'
+    param['ctrl']['sessionname'] = session['username']
+    if request.method == 'GET':
+        ret = restapi.get('http://localhost:5000/lct/api/v1.0/users/'+session['username'])
+        if ret['response'] == 0:
+            param['ctrl']['errormsg'] = 'No contact with backend'
+            return render_template('error.html', param=param)
+        param['ctrl']['name'] = ret['datalist'][0]['name']
+        param['ctrl']['email'] = ret['datalist'][0]['mail']
+        return render_template('user.html', param=param)
+    else:
+        #user = request.form['user']
+        name = request.form['name']
+        mail = request.form['email']
+        ret = restapi.get('http://localhost:5000/lct/api/v1.0/users/'+session['username'])
+        if ret['response'] == 0:
+            param['ctrl']['errormsg'] = 'No contact with backend'
+            return render_template('error.html', param=param)
+        if pbkdf2_sha256.verify(request.form['password'], ret['datalist'][0]['password']):
+            password = ret['datalist'][0]['password']
+            user = session['username']
+            data = {'user': user, 'name': name, 'password': password, 'mail': mail}
+            ret = restapi.post('http://localhost:5000/lct/api/v1.0/users', data)
+            if ret['response'] == 0:
+                param['ctrl']['errormsg'] = 'No contact with backend'
+                return render_template('error.html', param=param)
+            param['ctrl']['okmsg'] = 'Values has been updated'
+            return render_template('user.html', param=param)
+        else:
+            param['ctrl']['errormsg'] = 'Faulty password'
+            return render_template('user.html', param=param)
+
 
 @app.route('/newboard',methods=['GET','POST'])
 def newboard():
