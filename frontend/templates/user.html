@@ -37,6 +37,7 @@
             <li><a href="{{ url_for('index') }}">Home</a></li>
             {% if param['ctrl']['loggedin'] == 'yes' %}
             <li><a href="{{ url_for('logout') }}">Logout</a></li>
+            <li><a href="{{ url_for('user') }}">User</a></li>
             {% else %}
             <li><a href="{{ url_for('login') }}">Login</a></li>
             {% endif %}
@@ -99,6 +100,28 @@
                     <div class="input-group col-md-3">
                         <div class="input-group-addon" style="width: 2.6rem"><i class="fa fa-key"></i></div>
                         <input type="password" name="password" class="form-control" id="password" placeholder="Password" required>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="form-group has-danger">
+                    <div class="col-md-3"></div>
+                    <label class="control-lable col-md-1" for="password">New Password</label>
+                    <div class="input-group col-md-3">
+                        <div class="input-group-addon" style="width: 2.6rem"><i class="fa fa-key"></i></div>
+                        <input type="password" name="newpassword" class="form-control" id="newpassword" placeholder="New Password">
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="form-group has-danger">
+                    <div class="col-md-3"></div>
+                    <label class="control-lable col-md-1" for="password">Repeat New Password</label>
+                    <div class="input-group col-md-3">
+                        <div class="input-group-addon" style="width: 2.6rem"><i class="fa fa-key"></i></div>
+                        <input type="password" name="newpassword2" class="form-control" id="newpassword2" placeholder="Repeat New Password">
                     </div>
                 </div>
             </div>
