@@ -152,28 +152,34 @@
         $(document).ready(function(){
             $("#topicmodal").on("hide.bs.modal", function (e) {
                 clearInterval(topictimer);
+                timerflag = 0;
             });
         });
 
 
 
         var topictimer;
+        var timerflag = 0;
 
         function modaltimer()
         {
-            var elem = document.getElementById("timer");
-            var value = document.getElementById("timervalue");
-            var width = 0;
-            var interval = (value.value * 60) / 100;
-            elem.style.width = width + '%';
-            topictimer = setInterval(frame, interval*1000);
-            function frame() {
-                if (width >= 100) {
-                    clearInterval(topictimer);
-                    alert("Restart or leave");
-                } else {
-                    width++;
-                    elem.style.width = width + '%';
+            if (timerflag == 0) {
+                timerflag = 1;
+                var elem = document.getElementById("timer");
+                var value = document.getElementById("timervalue");
+                var width = 0;
+                var interval = (value.value * 60) / 100;
+                elem.style.width = width + '%';
+                topictimer = setInterval(frame, interval*1000);
+                function frame() {
+                    if (width >= 100) {
+                        clearInterval(topictimer);
+                        alert("Time's up!");
+                        timerflag = 0;
+                    } else {
+                        width++;
+                        elem.style.width = width + '%';
+                    }
                 }
             }
         }
