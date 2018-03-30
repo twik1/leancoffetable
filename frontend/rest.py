@@ -81,6 +81,7 @@ class CurlREST:
         index = 0
         board = self.get(self.baseurl + 'boards/' + boardid)
         datastore['ctrl']['votenum'] = board['datalist'][0]['votenum']
+        datastore['ctrl']['boardname'] = board['datalist'][0]['name']
 #        if 'datalist' in board:
 #            datastore['ctrl']['user'] = board['datalist'][0]['user']
 
