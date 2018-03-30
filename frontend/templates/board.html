@@ -148,6 +148,11 @@
             var elem = document.getElementById("timer");
             var width = 0;
             elem.style.width = width + '%';
+            var timerstarted = document.getElementById("timerstarted");
+            timerstarted.style.display = "none";
+            var timerfinished = document.getElementById("timerfinished");
+            timerfinished.style.display = "none";
+
         });
 
         $(document).ready(function(){
@@ -168,14 +173,19 @@
                 timerflag = 1;
                 var elem = document.getElementById("timer");
                 var value = document.getElementById("timervalue");
+                var timerstarted = document.getElementById("timerstarted");
+                var timerfinished = document.getElementById("timerfinished");
                 var width = 0;
                 var interval = (value.value * 60) / 100;
                 elem.style.width = width + '%';
                 topictimer = setInterval(frame, interval*1000);
+                timerstarted.style.display = "block";
                 function frame() {
                     if (width >= 100) {
                         clearInterval(topictimer);
-                        alert("Time's up!");
+                        //alert("Time's up!");
+                        timerstarted.style.display = "none";
+                        timerfinished.style.display = "block";
                         timerflag = 0;
                     } else {
                         width++;
@@ -199,6 +209,17 @@
                 <div class="modal-body">
                     <p id="topicdesc"></p>
                 </div>
+                    <div class="container-fluid" id="timerstarted">
+                        <div class="alert alert-info">
+                            <strong><i class="fa fa-exclamation fa-lg"></i> </strong>Timer started
+                        </div>
+                    </div>
+                    <div class="container-fluid" id="timerfinished">
+                        <div class="alert alert-success">
+                            <strong><i class="fa fa-check fa-lg"></i> </strong>Time's up
+                        </div>
+                    </div>
+
                 <div class="modal-footer">
                     <div class="progress">
                         <div class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width:0%" id="timer">
