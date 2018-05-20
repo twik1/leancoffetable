@@ -13,9 +13,16 @@ class DBMySQL:
 
 
     def conn(self):
-        self.db = pymysql.connect(self.ip,self.usr,self.pwd,self.datbase)
-        self.cursor = self.db.cursor()
-
+        try:
+            self.db = pymysql.connect(self.ip,self.usr,self.pwd,self.datbase)
+            self.cursor = self.db.cursor()
+            return 0
+        except pymysql.err.OperationalError as err:
+            if err.args[0] == '2003':
+                return 1 # Unable to connect
+            if err.args[0] == '1045':
+                return 2 # Fault user ow password
+            return 4 # Unknown error
 
     def disconn(self):
         self.db.close()
@@ -41,6 +48,17 @@ class DBMySQL:
         except:
             # Rollback in case there is any error
             print("Exception error: {0}".format(sys.exc_info()[0]))
+
+
+    def test_connection(self):
+        res = self.conn()
+        if not res == 0:
+            return res
+        sql = "SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = 'DBName'"
+        restup = ()
+        restup = self.db_get(sql)
+        if not len(restup):
+            return 3 # No database
 
 
 ##############################################################
@@ -118,8 +136,8 @@ user='%s',name='%s',startdate='%s',votenum='%s',created=null,updated=null" % \
             "INSERT INTO board(boardid,user,name,startdate,votenum,created,updated) \
 VALUES ('%s','%s','%s','%s','%s',null,null) ON DUPLICATE KEY UPDATE \
 user='%s',name='%s',startdate='%s',votenum='%s',created=null,updated=null" % \
-(obj['boardid'],obj['user'], obj['name'], obj['startdate'],obj['votenum'], \
- obj['user'], obj['name'],obj['startdate'],obj['votenum'])
+(obj['boardid'],obj['username'], obj['boardname'], obj['startdate'],obj['votenum'], \
+ obj['username'], obj['boardname'],obj['startdate'],obj['votenum'])
         self.db_set(sql)
 
 
@@ -162,8 +180,8 @@ user='%s',name='%s',startdate='%s',votenum='%s',created=null,updated=null" % \
             "INSERT INTO topic(boardid,heading,description,user,created,updated) \
 VALUES ('%s','%s','%s','%s',null,null) ON DUPLICATE KEY UPDATE \
 boardid='%s',heading='%s',description='%s',user='%s',created=null,updated=null" % \
-            (obj['boardid'], obj['heading'], obj['description'], obj['user'], \
-             obj['boardid'], obj['heading'], obj['description'], obj['user'])
+            (obj['boardid'], obj['heading'], obj['description'], obj['username'], \
+             obj['boardid'], obj['heading'], obj['description'], obj['username'])
         self.db_set(sql)
 
 
@@ -172,8 +190,8 @@ boardid='%s',heading='%s',description='%s',user='%s',created=null,updated=null" 
             "INSERT INTO topic(boardid,heading,description,user,created,updated) \
 VALUES ('%s','%s','%s','%s',null,null) ON DUPLICATE KEY UPDATE \
 boardid='%s',heading='%s',description='%s',user='%s',created=null,updated=null" % \
-            (obj['boardid'], obj['heading'], obj['description'], obj['user'], \
-             obj['boardid'], obj['heading'], obj['description'], obj['user'])
+            (obj['boardid'], obj['heading'], obj['description'], obj['username'], \
+             obj['boardid'], obj['heading'], obj['description'], obj['username'])
         self.db_set(sql)
 
 

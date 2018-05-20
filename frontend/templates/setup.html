@@ -1,0 +1,119 @@
+
+<!DOCTYPE html>
+<html lang="en">
+ 
+<head>
+    <title>Lean Coffee Table</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href='http://fonts.googleapis.com/css?family=Aldrich' rel='stylesheet' type='text/css'/>
+    <link href='http://fonts.googleapis.com/css?family=Roboto' rel='stylesheet' type='text/css'/>
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.1/css/font-awesome.min.css"/>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/lct.css') }}"/>
+</head>
+      
+<body>
+
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container-fluid">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar-collapse-3">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="#">Lean Coffee Table</a>
+        </div>
+
+
+        <div class="collapse navbar-collapse" id="navbar-collapse-3">
+          <ul class="nav navbar-nav navbar-right">
+            <li><a href="{{ url_for('index') }}">Home</a></li>
+            {% if param['ctrl']['loggedin'] == 'yes' %}
+            <li><a href="{{ url_for('logout') }}">Logout</a></li>
+            <li><a href="{{ url_for('user') }}">User</a></li>
+            {% else %}
+            <li><a href="{{ url_for('login') }}">Login</a></li>
+            {% endif %}
+            <li><a href="{{ url_for('about') }}">About</a></li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+
+    <div class="container-fluid">
+
+        <div class="row">
+            <div class="col-md-5"></div>
+            <div class="col-md-3">
+                <h2>Setup</h2>
+                <br>
+            </div>
+            <div class="col-md-4"></div>
+        </div>
+        <div class="row">
+            <div class="col-md-3"></div>
+            <div class="col-md-3">
+                <h4>Backend config</h4>
+                <br>
+            </div>
+            <div class="col-md-7"></div>
+        </div>
+
+        {% if 'data' in param %}
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Parameter</th>
+                    <th>Value</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for parameter, value in param['data'].items() %}
+                <tr>
+                    <td>{{ parameter }}</td>
+                    <td>{{ value }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        {% endif %}
+    </div>
+    
+    <div class="container-fluid">
+        <br>
+        {% if 'errormsg' in param['ctrl'] %}
+            <div class="alert alert-danger">
+                <strong><i class="fa fa-close fa-lg"></i> </strong>{{ param['ctrl']['errormsg'] }}
+            </div>
+        {% endif %}
+        {% if 'okmsg' in param['ctrl'] %}
+            <div class="alert alert-success">
+                <strong><i class="fa fa-check fa-lg"></i> </strong>{{ param['ctrl']['okmsg'] }}
+            </div>
+        {% endif %}
+    </div>
+
+    <div class="navbar navbar-default navbar-fixed-bottom">
+        <div class="container">
+            {% if 'sessionname' in param['ctrl'] %}
+                <p class="navbar-text pull-left">{{ param['ctrl']['sessionname'] }} Logged in</p>
+            {% else %}
+                <p class="navbar-text pull-left">No one logged in</p>
+            {% endif %}
+
+        </div>
+    </div>
+ 
+</body>
+ 
+</html>
+
+

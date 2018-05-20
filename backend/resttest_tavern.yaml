@@ -1,3 +1,4 @@
+# run with tavern-ci *yaml
 test_name: Rest API LCT tests
 
 stages:
@@ -28,6 +29,7 @@ stages:
         user: jdoe1
         password: good-password
         name: John Doe
+        mail: john.doe@hotmail.com
       method: POST
       headers:
         content-type: application/json
@@ -63,6 +65,7 @@ stages:
         user: jdoe2
         password: better-password
         name: Jane Doe
+        mail: jane.doe2.hotmail.com
       method: POST
       headers:
         content-type: application/json
@@ -109,6 +112,7 @@ stages:
         user: jdoe1
         password: perfect-password
         name: Johnny Doe
+        mail: john.doe@live.com
       method: PUT
       headers:
         content-type: application/json
@@ -141,8 +145,10 @@ stages:
     request:
       url: http://localhost:5000/lct/api/v1.0/boards
       json:
-        name: Lean coffee table event
-        user: jdoe1
+        boardname: Lean coffee table event
+        username: jdoe1
+        votenum: 0
+        startdate: 1970-01-01T00:00
       method: POST
       headers:
         content-type: application/json
@@ -166,8 +172,10 @@ stages:
     request:
       url: http://localhost:5000/lct/api/v1.0/boards
       json:
-        user: jdoe1
-        name: Next lean coffee event
+        username: jdoe1
+        boardname: Next lean coffee event
+        votenum: 3
+        startdate: 1970-01-01T00:00
       method: POST
       headers:
         content-type: application/json
@@ -211,8 +219,10 @@ stages:
     request:
       url: http://localhost:5000/lct/api/v1.0/boards/1
       json:
-        user: jdoe1
-        name:
+        boardname: Lean coffee table event updated
+        username: jdoe1
+        votenum: 5
+        startdate: 1980-01-01T00:00
       method: PUT
       headers:
         content-type: application/json
@@ -248,6 +258,7 @@ stages:
         boardid: 1
         heading: Very interesting topic
         description: Bla bla bla bla bla blettan bla, blä, blu
+        username: jdoe1
       method: POST
       headers:
         content-type: application/json
@@ -273,6 +284,7 @@ stages:
       json:
         heading: Even more interesting topic
         description: Den här topicsn är sjukt intressant
+        username: jdoe1
       method: POST
       headers:
         content-type: application/json
@@ -318,6 +330,7 @@ stages:
       json:
         heading: Quite a dull topic
         description: Den här topicen är sjukt tråkig
+        username: jdoe1
       method: PUT
       headers:
         content-type: application/json

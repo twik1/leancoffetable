@@ -119,3 +119,12 @@ class CurlREST:
             return True
         else:
             return False
+
+    def getconfig(self, param):
+        ids = self.get(self.baseurl+"config")
+        param['ctrl']['response'] = ids['response']
+        if 'datalist' in ids:
+            param['data'] = ids['datalist']
+        return param
+
+

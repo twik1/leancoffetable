@@ -234,7 +234,7 @@ def newtopic(boardid):
         topicheading = request.form['topicheading']
         topicdesc = request.form['topicdesc']
         boardid = request.form['boardid']
-        data = {'heading':topicheading,'description':topicdesc,'user':session['username']}
+        data = {'heading':topicheading,'description':topicdesc,'username':session['username']}
         if restapi.post('http://localhost:5000/lct/api/v1.0/boards/'+boardid+'/topics', data):
             return redirect(url_for('board',boardid=boardid))
         else:
@@ -302,6 +302,20 @@ def about():
     return render_template('about.html', param=param)
 
 
+@app.route('/setup.html',methods=['GET'])
+def setup():
+    param = {}
+    param ['ctrl'] ={}
+    if 'username' in session.keys():
+        param['ctrl']['loggedin'] = 'yes'
+        param['ctrl']['sessionname'] = session['username']
+    param = restapi.getconfig(param)
+    if param['ctrl']['response'] == 0:
+        param['ctrl']['errormsg'] = 'No contact with backend'
+        return render_template('error.html', param=param)
+    return render_template('setup.html', param=param)
+
+
 if __name__ == '__main__':
     app.secret_key = 'super secret key'
     app.config['SESSION_TYPE'] = 'filesystem'
@@ -309,4 +323,4 @@ if __name__ == '__main__':
     sess.init_app(app)
 
     restapi = rest.CurlREST()
-    app.run(debug=True, host='127.0.0.1', port=5050)
+    app.run(debug=True, host='192.168.0.200', port=5050)

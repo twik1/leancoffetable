@@ -3,7 +3,18 @@ from flask import Flask, abort, request, jsonify, make_response
 import mysqldb
 import json
 import datetime
+import config
+import time
+import sys
+import subprocess
+from multiprocessing import Process, Queue
 
+LCTVER = '0.8.0'
+CFGDEF = {'mysql_user':'lctusr','mysql_password':'lctpwd', 'mysql_database':'lctdb', 'mysql_host':'127.0.0.1',
+          'listen_address':'127.0.0.1','listen_port':'5000', 'lct_version': LCTVER}
+CFGEMPTY = {'mysql_user':'','mysql_password':'', 'mysql_database':'', 'mysql_host':'',
+          'listen_address':'','listen_port':'', 'lct_version': ''}
+state = {}
 
 app = Flask(__name__)
 
@@ -116,6 +127,7 @@ def add_board():
         'startdate': startdate,
         'votenum': request.json['votenum']
         }
+    # ToDo: check votenum 0,1,3,5,10
     dbconnect.add_board(board)
     dbconnect.disconn()
     # ToDo: return boardid
@@ -138,8 +150,9 @@ def update_board(boardid):
         gabort("Missing parameter", 404)
     if not dbconnect.check_board(boardid):
         gabort("No such board", 404)
-    if not dbconnect.check_user(request.json['user']):
+    if not dbconnect.check_user(request.json['username']):
         gabort("No such user", 404)
+    startdate = conv_startdate(request.json['startdate'])
     board = {
         'username': request.json['username'],
         'boardname': request.json['boardname'],
@@ -178,20 +191,21 @@ def get_topics(boardid):
 @app.route('/lct/api/v1.0/boards/<boardid>/topics', methods=['POST'])
 def add_topic(boardid):
     dbconnect.conn()
-    if not check_result(['heading','description','user']):
+    if not check_result(['heading','description','username']):
         gabort("Missing parameter", 404)
     if not dbconnect.check_board(boardid):
         gabort("No such board", 404)
     topic = {
         'heading': request.json['heading'],
         'description': request.json['description'],
-        'user': request.json['user'],
+        'username': request.json['username'],
         'boardid': boardid,
         }
     dbconnect.add_topic(topic)
     dbconnect.disconn()
     # ToDo: return topicid
     return jsonify(topic), 201
+
 
 
 @app.route('/lct/api/v1.0/boards/<boardid>/topics/<topicid>', methods=['GET'])
@@ -209,7 +223,7 @@ def get_topic(boardid, topicid):
 @app.route('/lct/api/v1.0/boards/<boardid>/topics/<topicid>', methods=['PUT'])
 def update_topic(boardid, topicid):
     dbconnect.conn()
-    if not check_result(['heading','description']):
+    if not check_result(['heading','description','username']):
         gabort("Missing parameter", 404)
     if not dbconnect.check_board(boardid):
         gabort("No such board", 404)
@@ -218,11 +232,13 @@ def update_topic(boardid, topicid):
     topic = {
         'heading': request.json['heading'],
         'description': request.json['description'],
+        'username': request.json['username'],
         'topicid': topicid,
         'boardid': boardid,
     }
     dbconnect.update_topic(topic)
     dbconnect.disconn()
+    # ToDo: only owning user can update
     # ToDo: return topicid
     return jsonify(topic), 201
 
@@ -297,6 +313,77 @@ def delete_vote(boardid, topicid, voteid):
     return jsonify({'voteid': voteid}), 201
 
 
+# Maybe use a less specific list for configuration
+@app.route('/lct/api/v1.0/config', methods=['PUT'])
+def update_config():
+    cfgstore = {'mysql_user': request.json.get('mysql_user', ""),
+                'mysql_password': request.json.get('mysql_password', ""),
+                'mysql_database': request.json.get('mysql_database', ""),
+                'mysql_host': request.json.get('mysql_host', ""),
+                'listen_address': request.json.get('listen_address', ""),
+                'listen_port': request.json.get('listen_port', ""),
+                'lct_version': request.json.get('lct_version', ""),
+                }
+    cfg.config_set(cfgstore)
+    return jsonify('success'), 201
+
+
+@app.route('/lct/api/v1.0/config', methods=['GET'])
+def get_config():
+    cfgstore = CFGEMPTY
+    cfg.config_get(cfgstore)
+    return jsonify(cfgstore)
+
+
+def setup(cfgstore):
+    global cfg, dbconnect, state
+    # Configuration
+    cfg = config.Config()
+    cfg.config_get(cfgstore)
+    state['config'] = 'ok'
+
+    dbconnect = mysqldb.DBMySQL(cfgstore['mysql_host'], cfgstore['mysql_user'],
+                                       cfgstore['mysql_password'], cfgstore['mysql_database'])
+    res = dbconnect.test_connection()
+    if res == 1:
+        state['mysql_run'] = 'nok'
+    else:
+        state['mysql_run'] = 'ok'
+    if res == 2:
+        state['mysql_usrpwd'] = 'nok'
+    else:
+        state['mysql_usrpwd'] = 'ok'
+    if res == 3:
+        state['mysql_db'] = 'nok'
+    else:
+        state['mysql_db'] = 'ok'
+    if res == 4:
+        state['mysql_unknow'] = 'nok'
+    else:
+        state['mysql_unknow'] = 'ok'
+
+
+def start_backend(queue):
+    global some_queue
+    some_queue = queue
+
+    cfgstore = CFGEMPTY
+    setup(cfgstore)
+
+    app.run(debug=True, use_reloader=False, host=cfgstore['listen_address'], port=int(cfgstore['listen_port']))
+
 if __name__ == '__main__':
-    dbconnect = mysqldb.DBMySQL('127.0.0.1', 'lctusr', 'lctpwd', 'lctdb')
-    app.run(debug=True)
+    q = Queue()
+    p = Process(target=start_backend, args=[q, ])
+    p.start()
+    while True:
+        if q.empty(): # sleep on queue?
+            time.sleep(1)
+        else:
+            msg = q.get()
+            break
+    p.terminate()
+
+    if msg == 'restart':
+        args = [sys.executable] + [sys.argv[0]]
+        subprocess.call(args)
