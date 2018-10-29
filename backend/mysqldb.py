@@ -6,6 +6,17 @@ import json
 
 class DBMySQL:
     def __init__(self, ip, usr, pwd, db):
+        """
+
+        :param ip:
+            IP address to the MySQL server
+        :param usr:
+            Username for the lctdb database
+        :param pwd:
+            Password for the lctdb database
+        :param db:
+            Name of the lctdb database
+        """
         self.ip = ip
         self.usr = usr
         self.pwd = pwd
@@ -13,6 +24,15 @@ class DBMySQL:
 
 
     def conn(self):
+        """ Connect to the MySQL database
+
+        :return:
+            0 If success
+            1 If unable to connect
+            2 Faulty user of password
+
+            4 Unknown error
+        """
         try:
             self.db = pymysql.connect(self.ip,self.usr,self.pwd,self.datbase)
             self.cursor = self.db.cursor()
@@ -25,10 +45,23 @@ class DBMySQL:
             return 4 # Unknown error
 
     def disconn(self):
+        """ Disconnect from the MySQL database
+
+        :return:
+            Nothing
+        """
         self.db.close()
 
 
     def db_set(self, sql):
+        """ Execute a SQL statement towards the database
+
+        :param sql:
+            A string with a SQL statement
+            not expecting any thing in return
+        :return:
+            Nothing
+        """
         try:
             # Execute the SQL command
             self.cursor.execute(sql)
@@ -41,6 +74,14 @@ class DBMySQL:
 
 
     def db_get(self, sql):
+        """ Execute a SQL statement towards the database
+
+        :param sql:
+            A string with a SQL statement
+            expecting some kind of result
+        :return:
+            Returning a tuple
+        """
         try:
             # Execute the SQL command
             self.cursor.execute(sql)
@@ -50,7 +91,12 @@ class DBMySQL:
             print("Exception error: {0}".format(sys.exc_info()[0]))
 
 
+    # Document further and maybe change name to db_test
     def test_connection(self):
+        """ Test the database connection
+
+        :return:
+        """
         res = self.conn()
         if not res == 0:
             return res
@@ -64,16 +110,26 @@ class DBMySQL:
 ##############################################################
 
 
-    def get_users(self):
-        userlist = []
-        sql = "SELECT * FROM user"
-        usertup = self.db_get(sql)
-        for user in usertup:
-            userlist.append({'user': user[0]})
-        return userlist
+#    def get_users(self):
+#        userlist = []
+#        sql = "SELECT * FROM user"
+#        usertup = self.db_get(sql)
+#        for user in usertup:
+#            userlist.append({'user': user[0]})
+#        return userlist
 
 
     def get_user(self, user):
+        """ Get a user from lctdb
+
+        :param user:
+            Username string
+        :return:
+            A list with a dictionary of the user
+            [{user:twik, name:Tommy, password:supersecret, mail:twik@duckdns.org}]
+            Empty if user doesn't exist ?
+
+        """
         uservalues = []
         usertup = ()
         sql = "SELECT * FROM user WHERE user = '%s'" % user
@@ -85,6 +141,14 @@ class DBMySQL:
 
 
     def check_user(self, user):
+        """ Check if a user exists in the lctdb
+
+        :param user:
+            Username string
+        :return:
+            True if user exists
+            False if user doesn't exists
+        """
         if self.get_user(user):
             return True
         else:
@@ -92,7 +156,17 @@ class DBMySQL:
 
 
     def add_user(self, obj):
-        # obj expected dictionary {user: 'user', name: 'name', password: 'password}
+        """ Add a user to the lctdb
+
+        :param obj:
+            A dictionary with a set of key:values
+            Mandatory:
+                user, password, mail
+            Optional:
+                name
+        :return:
+            Nothing
+        """
         sql = \
               "INSERT INTO user(user,name,password,mail,created,updated) \
 VALUES ('%s','%s','%s','%s',null,null) ON DUPLICATE KEY UPDATE \
@@ -102,6 +176,13 @@ name='%s',password='%s',mail='%s',created=null,updated=null" % \
 
 
     def del_user(self, user):
+        """ Delete a user from the lctdb
+
+        :param user:
+            Username string
+        :return:
+            Nothing
+        """
         sql = "DELETE FROM user WHERE user='%s'" % user
         self.db_set(sql)
 
@@ -110,6 +191,12 @@ name='%s',password='%s',mail='%s',created=null,updated=null" % \
 
 
     def get_boards(self):
+        """ Get all boards from the lctdb
+
+        :return:
+            A list of dictionaries of [{boardid:<boardid>},{boardid:<boardid>}]
+            Empty if no board is found
+        """
         boardlist = []
         boardtup = ()
         sql = "SELECT * FROM board"
@@ -120,7 +207,17 @@ name='%s',password='%s',mail='%s',created=null,updated=null" % \
 
 
     def add_board(self, obj):
-        # obj expected dictionary {username: 'username', boardname: 'boardname', startdate: 'startdate'}
+        """ Add a board to the lctdb
+
+        :param obj:
+            A dictionary with a set of key:values
+            Mandatory:
+                username, boardname, startdate, votenum
+                Rename to user to be consistent?
+
+        :return:
+            Nothing
+        """
         sql = \
               "INSERT INTO board(user,name,startdate,votenum,created,updated) \
 VALUES ('%s','%s','%s','%s',null,null) ON DUPLICATE KEY UPDATE \
