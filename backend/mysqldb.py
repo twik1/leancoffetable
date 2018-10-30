@@ -6,7 +6,7 @@ import json
 
 class DBMySQL:
     def __init__(self, ip, usr, pwd, db):
-        """
+        """ Init for the MySQL class
 
         :param ip:
             IP address to the MySQL server
@@ -120,12 +120,12 @@ class DBMySQL:
 
 
     def get_user(self, user):
-        """ Get a user from lctdb
+        """ Get a user from the lctdb
 
         :param user:
             Username string
         :return:
-            A list with a dictionary of the user
+            A list with a dictionary of the user data
             [{user:twik, name:Tommy, password:supersecret, mail:twik@duckdns.org}]
             Empty if user doesn't exist ?
 
@@ -228,7 +228,16 @@ user='%s',name='%s',startdate='%s',votenum='%s',created=null,updated=null" % \
         self.db_set(sql)
 
     def update_board(self, obj):
-        # obj expected dictionary {boardid: 'boardid', user: 'user', name: 'name', date:'date'}
+        """ Update a board in the lctdb
+
+        :param obj:
+            A dictionary with a set of key:values
+            Mandatory:
+                username, boardname, startdate, votenum
+                Rename to user to be consistent?
+        :return:
+            Nothing
+        """
         sql = \
             "INSERT INTO board(boardid,user,name,startdate,votenum,created,updated) \
 VALUES ('%s','%s','%s','%s','%s',null,null) ON DUPLICATE KEY UPDATE \
@@ -239,6 +248,15 @@ user='%s',name='%s',startdate='%s',votenum='%s',created=null,updated=null" % \
 
 
     def get_board(self, boardid):
+        """ Get a board from lctdb
+
+        :param boardid:
+            Id of the board
+        :return:
+            A list with a dictionary of the board data
+            [{boardid:1, name:Test board, user:twik, date:xxxx, votenum: 3}]
+            Empty if board doesn't exist ?
+        """
         boardvalues = []
         sql = "SELECT * FROM board WHERE boardid = '%s'" % boardid
         boardtup = self.db_get(sql)
@@ -249,6 +267,14 @@ user='%s',name='%s',startdate='%s',votenum='%s',created=null,updated=null" % \
 
 
     def check_board(self, boardid):
+        """ Check to see if a boardid exists
+
+        :param boardid:
+            Id of the board
+        :return:
+            True if board exist
+            False if board doesn't exist
+        """
         if self.get_board(boardid):
             return True
         else:
@@ -256,6 +282,13 @@ user='%s',name='%s',startdate='%s',votenum='%s',created=null,updated=null" % \
 
 
     def del_board(self, boardid):
+        """ Delete a boardid
+
+        :param boardid:
+            The id of the board to be deleted
+        :return:
+            Nothing?
+        """
         sql = "DELETE FROM board WHERE boardid = '%s'" % boardid
         self.db_set(sql)
 
@@ -264,6 +297,14 @@ user='%s',name='%s',startdate='%s',votenum='%s',created=null,updated=null" % \
 
 
     def get_topics(self, boardid):
+        """ Get all topics for a certain boardid
+
+        :param boardid:
+            Id of the board to search for topics
+        :return:
+            A list of dictionaries of [{topicid:<topicid1>},{topicid:<topicid2>}]
+            Empty if no topic is found
+        """
         topiclist = []
         sql = "SELECT * FROM topic WHERE boardid = '%s'" % boardid
         topictup = self.db_get(sql)
@@ -273,6 +314,19 @@ user='%s',name='%s',startdate='%s',votenum='%s',created=null,updated=null" % \
 
 
     def add_topic(self, obj):
+        """ Add a topic to the boardid in the lctdb
+
+        :param obj:
+            A dictionary with a set of key:values
+            Mandatory:
+                boardid, heading, description, username
+                Rename to user to be consistent?            A dictionary with a set of key:values
+            Mandatory:
+                boardid, heading, description, username
+                Rename to user to be consistent?
+        :return:
+            Nothing
+        """
         sql = \
             "INSERT INTO topic(boardid,heading,description,user,created,updated) \
 VALUES ('%s','%s','%s','%s',null,null) ON DUPLICATE KEY UPDATE \
@@ -283,6 +337,17 @@ boardid='%s',heading='%s',description='%s',user='%s',created=null,updated=null" 
 
 
     def update_topic(self, obj):
+        """ Update a topic for a boardid in the lctdb
+
+        :param obj:
+            A dictionary with a set of key:values
+            Mandatory:
+                boardid, heading, description, username
+                Rename to user to be consistent?
+                Is this function used? it needs topicid?
+        :return:
+            Nothing
+        """
         sql = \
             "INSERT INTO topic(boardid,heading,description,user,created,updated) \
 VALUES ('%s','%s','%s','%s',null,null) ON DUPLICATE KEY UPDATE \
@@ -293,6 +358,15 @@ boardid='%s',heading='%s',description='%s',user='%s',created=null,updated=null" 
 
 
     def get_topic(self, topicid):
+        """ Get a topic from lctdb
+
+        :param topicid:
+            Id of the topic
+        :return:
+            A list with a dictionary of the topic data
+            [{topicid:1, boardid:1, heading:Topic head, description:Topic desc, user:twik}]
+            Empty if board doesn't exist ?
+        """
         topicvalues = []
         sql = "SELECT * FROM topic WHERE topicid = '%s'" % topicid
         topictup = self.db_get(sql)
@@ -304,6 +378,14 @@ boardid='%s',heading='%s',description='%s',user='%s',created=null,updated=null" 
 
 
     def check_topic(self, topicid):
+        """ Check to see if a topicid exists
+
+        :param topicid:
+            Id of the topic
+        :return:
+            True if topicid exist
+            False if topicid doesn't exist
+        """
         if self.get_topic(topicid):
             return True
         else:
@@ -311,6 +393,13 @@ boardid='%s',heading='%s',description='%s',user='%s',created=null,updated=null" 
 
 
     def del_topic(self, topicid):
+        """ Delete a topicid
+
+        :param topicid:
+            Id of the topic to be deleted
+        :return:
+            Nothing
+        """
         sql = "DELETE FROM topic WHERE topicid = '%s'" % topicid
         self.db_set(sql)
 
@@ -319,6 +408,16 @@ boardid='%s',heading='%s',description='%s',user='%s',created=null,updated=null" 
 
 
     def get_votes(self,boardid,topicid):
+        """ Get votes for a topicid
+
+        :param boardid:
+            boardid, maybe not used?
+        :param topicid:
+            The topicid to search for votes
+        :return:
+            A list of dictionaries of [{voteid:<voteid1>},{voteid:<voteid2>}]
+            Empty if no voteid is found
+        """
         votelist = []
         sql = "SELECT * FROM votes WHERE topicid = '%s'" % topicid
         votetup = self.db_get(sql)
@@ -328,6 +427,15 @@ boardid='%s',heading='%s',description='%s',user='%s',created=null,updated=null" 
 
 
     def add_vote(self, obj):
+        """ Add a vote to a topicid
+
+        :param obj:
+            A dictionary with a set of key:values
+            Mandatory:
+                topicid, user,
+        :return:
+            Nothing
+        """
         sql = \
             "INSERT INTO votes(user,topicid) \
 VALUES ('%s','%s') ON DUPLICATE KEY UPDATE user='%s',topicid='%s'" % \
@@ -336,6 +444,17 @@ VALUES ('%s','%s') ON DUPLICATE KEY UPDATE user='%s',topicid='%s'" % \
 
 
     def get_vote(self, topicid, voteid):
+        """ Get a voteid
+
+        :param topicid:
+            topicid, maybe not used?
+        :param voteid:
+            Id of the vote
+        :return:
+            A list with a dictionary of the topic data
+            [{user:twik, topicid:1}]
+            Empty if voteid doesn't exist ?
+        """
         votevalues = []
         sql = "SELECT * FROM votes WHERE voteid = '%s'" % voteid
         votetup = self.db_get(sql)
@@ -346,6 +465,14 @@ VALUES ('%s','%s') ON DUPLICATE KEY UPDATE user='%s',topicid='%s'" % \
 
 
     def check_vote(self, voteid):
+        """ Check to see if a voteid exists
+
+        :param voteid:
+            Id of the vote
+        :return:
+            True if voteid exist
+            False if voteid doesn't exist
+        """
         if self.get_vote(voteid):
             return True
         else:
@@ -353,5 +480,12 @@ VALUES ('%s','%s') ON DUPLICATE KEY UPDATE user='%s',topicid='%s'" % \
 
 
     def del_vote(self, voteid):
+        """ Delete a voteid
+
+        :param voteid:
+            Id of the vote to be deleted
+        :return:
+            Nothing
+        """
         sql = "DELETE FROM votes WHERE voteid = '%s'" % voteid
         self.db_set(sql)
