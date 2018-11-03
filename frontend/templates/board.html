@@ -88,27 +88,32 @@
                                 <div style="height: 8rem;text-overflow: ellipsis;overflow: hidden;">
                                     <p style="text-overflow: ellipsis;overflow: hidden;">{{ topic['description'] }}</p>
                                 </div>
-                                <p class="card-text">{{ topic['numvote'] }} Votes
+
+                                <p style="height: 4rem;" class="card-footer text-right">
                                     {% if 'sessionname' in param['ctrl'] %}
                                         {% if param['ctrl']['sessionname'] == topic['user'] %}
-                                            <a href="#" class="btn confirmdel tooltips" data-id="{{ url_for('deltopic', boardid=topic['boardid'],topicid=topic['topicid']) }}" title="Delete">
+                                            <a href="#" class="btn confirmdel tooltips pull-left" data-id="{{ url_for('deltopic', boardid=topic['boardid'],topicid=topic['topicid']) }}" title="Delete">
                                                 <span class="fa fa-trash-o fa-lg"></span>
                                             </a>
                                         {% endif %}
-                                        {% if 'thumbsup' in topic %}
-                                            <a href="#" class="btn tooltips" onclick="location.href='{{ url_for('delvote',boardid=topic['boardid'],topicid=topic['topicid'],voteid=topic['thumbsup']) }}';" title="Vote">
-                                                <span class="fa fa-thumbs-up fa-lg"></span>
+
+
+                                        {% if (param['ctrl']['myvote'] != 0) and (topic['myvotes'] != 0) %}
+                                            <a href="#" class="btn tooltips" onclick="location.href='{{ url_for('delvote',boardid=topic['boardid'],topicid=topic['topicid'],voteid=0) }}';" title="Remove vote">
+                                                <span class="fa fa-minus fa-lg"></span>
                                             </a>
-                                        {% else %}
-                                            {% if param['ctrl']['myvote'] < param['ctrl']['votenum'] or param['ctrl']['votenum'] == 0 %}
-                                            <a href="#" class="btn tooltips" onclick="location.href='{{ url_for('newvote',boardid=topic['boardid'],topicid=topic['topicid']) }}';" title="Vote">
-                                                <span class="fa fa-thumbs-down fa-lg"></span>
+                                        {% endif %}
+
+                                        {% if (param['ctrl']['myvote'] < param['ctrl']['votenum']) or (param['ctrl']['votenum'] == 0) %}
+                                            <a href="#" class="btn tooltips" onclick="location.href='{{ url_for('newvote',boardid=topic['boardid'],topicid=topic['topicid']) }}';" title="Add vote">
+                                                <span class="fa fa-plus fa-lg"></span>
                                             </a>
-                                            {% endif %}
                                         {% endif %}
                                     {% endif %}
+
+                                    <span style="margin-right: 8px;margin-left: 8px;">{{ topic['numvote'] }}({{ topic['myvotes'] }}) Votes</span>
                                 </p>
-                                <br>
+
                             </div>
                         </a>
                     </div>
