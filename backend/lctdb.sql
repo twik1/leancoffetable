@@ -1,7 +1,7 @@
 SELECT '<info_to_display>' AS ' ';
 
 drop database lctdb;
-
+SET sql_mode = '';
 create database lctdb;
 GRANT ALL PRIVILEGES ON lctdb.* to 'lctusr'@'127.0.0.1' identified by 'lctpwd';
 use lctdb;
