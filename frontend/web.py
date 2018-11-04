@@ -210,11 +210,11 @@ def delboard(boardid):
 def board(boardid):
     param = {}
     param ['ctrl'] ={}
+    param['ctrl']['boardid'] = boardid
     if 'username' in session.keys():
         param['ctrl']['loggedin'] = 'yes'
         param['ctrl']['sessionname'] = session['username']
     param = restapi.gettopics(boardid, param)
-    param['ctrl']['boardid'] = boardid
     if param['ctrl']['response'] == 0:
         param['ctrl']['errormsg'] = 'No contact with backend'
         return render_template('error.html', param=param)
@@ -288,7 +288,8 @@ def newvote(boardid, topicid):
 @app.route('/boards/<boardid>/topics/<topicid>/votes/<voteid>',methods=['GET'])
 def delvote(boardid, topicid, voteid):
     if 'username' in session.keys():
-       ret = restapi.delete('http://localhost:5000/lct/api/v1.0/boards/'+boardid+'/topics/'+topicid+'/votes/'+voteid)
+        ret = restapi.delvote(boardid, topicid, voteid, session['username'])
+        #ret = restapi.delete('http://localhost:5000/lct/api/v1.0/boards/'+boardid+'/topics/'+topicid+'/votes/'+voteid)
     return redirect(url_for('board', boardid=boardid))
 
 

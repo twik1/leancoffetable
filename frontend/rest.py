@@ -77,6 +77,18 @@ class CurlREST:
 
 
     def gettopics(self, boardid, datastore):
+        """
+        Get all topic data for a specific boardid
+
+        :param boardid:
+            Id of a specific board <1>
+        :param datastore:
+            A dictionary of {ctrl:{loggedin:<yes/no>, sessionname:<twik>,boardid:<1>}
+        :return:
+            More parameters for datastore
+            {ctrl:{votenum:<3>,boardname:<name>,
+            {data:{
+        """
         datastore['data'] = []
         index = 0
         board = self.get(self.baseurl + 'boards/' + boardid)
@@ -88,28 +100,32 @@ class CurlREST:
         ids = self.get(self.baseurl+"boards/"+boardid+'/topics')
         datastore['ctrl']['response'] = ids['response']
 
-        myvote = 0
+        myvote = 0  # Total number of votes for me of the entire board
         if 'datalist' in ids:
-            for id in ids['datalist']:
-                thumbsup = 0
-                numvote = 0
+            for id in ids['datalist']:  # Loop through topics
+                #thumbsup = 0
+                numvote = 0  # Total number of votes for each topic
                 topic = self.get(self.baseurl+'boards/'+boardid+'/topics/'+str(id['topicid']))
                 datastore['data'].append(topic['datalist'][0])
                 # Handle votes
                 vids = self.get(self.baseurl+"boards/"+boardid+'/topics/'+str(id['topicid'])+'/votes')
                 if 'datalist' in vids:
+                    myvotes = 0  # Total number of of votes for me for each topic
                     for ids in vids['datalist']:
                         vote = self.get(self.baseurl+"boards/"+boardid+'/topics/'+str(id['topicid'])+'/votes/'+str(ids['voteid']))
                         #if 'datalist' in vote:
                         if 'sessionname' in datastore['ctrl']:
                             if datastore['ctrl']['sessionname'] == vote['datalist'][0]['user']:
-                                datastore['data'][index]['thumbsup'] = str(ids['voteid'])
+                                #datastore['data'][index]['thumbsup'] = str(ids['voteid'])
+                                myvotes = myvotes + 1
                                 myvote = myvote + 1
                         numvote = numvote + 1
+                    datastore['data'][index]['myvotes'] = myvotes
                 datastore['data'][index]['numvote'] = numvote
                 index = index + 1
-        sortedlist = self.sortlist(datastore['data'])
-        datastore['data'] = sortedlist
+        # Only sort on request
+        #sortedlist = self.sortlist(datastore['data'])
+        #datastore['data'] = sortedlist
         datastore['ctrl']['myvote'] = myvote
         return datastore
 
@@ -127,4 +143,13 @@ class CurlREST:
             param['data'] = ids['datalist']
         return param
 
-
+    def delvote(self, boardid, topicid, voteid, username):
+        if voteid == '0':
+            vids = self.get(self.baseurl + "boards/" + boardid + '/topics/' + topicid + '/votes')
+            if 'datalist' in vids:
+                for ids in vids['datalist']:
+                    vote = self.get(self.baseurl + "boards/" + boardid + '/topics/' + topicid + '/votes/' + str(ids['voteid']))
+                    if username == vote['datalist'][0]['user']:
+                        voteid = str(ids['voteid'])
+                        break
+        self.delete(self.baseurl + "boards/" + boardid + "/topics/" + topicid + "/votes/" + voteid)
