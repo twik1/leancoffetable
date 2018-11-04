@@ -12,11 +12,12 @@
     <link href='http://fonts.googleapis.com/css?family=Roboto' rel='stylesheet' type='text/css'/>
 
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.1/css/font-awesome.min.css"/>
+
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU" crossorigin="anonymous">
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
-
+    <script src="http://rawgithub.com/makeusabrew/bootbox/master/bootbox.js"></script>
 
     <link rel="stylesheet" href="{{ url_for('static', filename='css/lct.css') }}"/>
     <script>
@@ -76,44 +77,49 @@
 	    <div class="row">
             {% for topic in param['data'] %}
 	            <div class="col-md-3 col-sm-4">
-                    <div class="card" style="width: 25rem;">
+                    <div class="card">
                         <a href="#topicmodal" id="nodec" data-target="#topicmodal" data-toggle="modal" data-id="{{ topic['heading'] }}|{{ topic['description'] }}|{{ topic['numvote'] }}" class="modaltopic">
                             <div class="card-img-top" style="background-color:rgba(22, 160, 133, 0.1) " id="topimg">
                                 <center><i class="fa fa-comments" style="color:#16A085"></i></center>
                             </div>
                             <div class="card-block">
-                                <div style="height: 2rem;">
-                                    <h4 style="text-overflow: ellipsis;overflow: hidden;white-space: nowrap;">{{ topic['heading'] }}</h4>
+                                <div class="card-block-header">
+                                    <h4>{{ topic['heading'] }}</h4>
                                 </div>
-                                <div style="height: 8rem;text-overflow: ellipsis;overflow: hidden;">
-                                    <p style="text-overflow: ellipsis;overflow: hidden;">{{ topic['description'] }}</p>
+                                <div class="card-block-main">
+                                    <p>{{ topic['description'] }}</p>
                                 </div>
+                            </div>
+                            <div class="card-footer">
+                                <table class="table-condensed">
+                                    <tr>
+                                        {% if 'sessionname' in param['ctrl'] %}
+                                            <td style="width: 5%;">
+                                                {% if param['ctrl']['sessionname'] == topic['user'] %}
+                                                    <a href="#" class="btn confirmdel tooltips pull-left" data-id="{{ url_for('deltopic', boardid=topic['boardid'],topicid=topic['topicid']) }}" title="Delete">
+                                                        <span class="fas fa-trash-alt"></span>
+                                                    </a>
+                                                {% endif %}
+                                            </td>
+                                            <td class="text-right" style="width: 50%;">
+                                                {% if (param['ctrl']['myvote'] != 0) and (topic['myvotes'] != 0) %}
+                                                    <a href="#" class="btn tooltips" onclick="location.href='{{ url_for('delvote',boardid=topic['boardid'],topicid=topic['topicid'],voteid=0) }}';" title="Remove vote">
+                                                        <span class="fas fa-minus"></span>
+                                                    </a>
+                                                {% endif %}
 
-                                <p style="height: 4rem;" class="card-footer text-right">
-                                    {% if 'sessionname' in param['ctrl'] %}
-                                        {% if param['ctrl']['sessionname'] == topic['user'] %}
-                                            <a href="#" class="btn confirmdel tooltips pull-left" data-id="{{ url_for('deltopic', boardid=topic['boardid'],topicid=topic['topicid']) }}" title="Delete">
-                                                <span class="fa fa-trash-o fa-lg"></span>
-                                            </a>
+                                                {% if (param['ctrl']['myvote'] < param['ctrl']['votenum']) or (param['ctrl']['votenum'] == 0) %}
+                                                    <a href="#" class="btn tooltips" onclick="location.href='{{ url_for('newvote',boardid=topic['boardid'],topicid=topic['topicid']) }}';" title="Add vote">
+                                                        <span class="fas fa-plus"></span>
+                                                    </a>
+                                                {% endif %}
+                                            </td>
                                         {% endif %}
-
-
-                                        {% if (param['ctrl']['myvote'] != 0) and (topic['myvotes'] != 0) %}
-                                            <a href="#" class="btn tooltips" onclick="location.href='{{ url_for('delvote',boardid=topic['boardid'],topicid=topic['topicid'],voteid=0) }}';" title="Remove vote">
-                                                <span class="fa fa-minus fa-lg"></span>
-                                            </a>
-                                        {% endif %}
-
-                                        {% if (param['ctrl']['myvote'] < param['ctrl']['votenum']) or (param['ctrl']['votenum'] == 0) %}
-                                            <a href="#" class="btn tooltips" onclick="location.href='{{ url_for('newvote',boardid=topic['boardid'],topicid=topic['topicid']) }}';" title="Add vote">
-                                                <span class="fa fa-plus fa-lg"></span>
-                                            </a>
-                                        {% endif %}
-                                    {% endif %}
-
-                                    <span style="margin-right: 8px;margin-left: 8px;">{{ topic['numvote'] }}({{ topic['myvotes'] }}) Votes</span>
-                                </p>
-
+                                        <td class="text-right" style="width: 45%;">
+                                            <span>{{ topic['numvote'] }}({{ topic['myvotes'] }}) Votes</span>
+                                        </td>
+                                    </tr>
+                                </table>
                             </div>
                         </a>
                     </div>
@@ -133,7 +139,6 @@
         </div>
     </div>
 
-    <script src="http://rawgithub.com/makeusabrew/bootbox/master/bootbox.js"></script>
     <script>
         $(document).on("click", ".confirmdel", function(e) {
             var url = $(this).attr("data-id");
@@ -143,6 +148,9 @@
                     window.location.href=url
                 }
             });
+        });
+        $(document).on("click", ".modaltopic a", function(e) {
+            e.stopPropagation();
         });
 
         $(document).on("click", ".modaltopic", function(e) {
