@@ -1,25 +1,20 @@
-
 <!DOCTYPE html>
 <html lang="en">
  
 <head>
     <title>Lean Coffee Table</title>
     <meta charset="utf-8">
-    <title>Lean Coffee Table</title>
-    <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+
     <link href='http://fonts.googleapis.com/css?family=Aldrich' rel='stylesheet' type='text/css'/>
     <link href='http://fonts.googleapis.com/css?family=Roboto' rel='stylesheet' type='text/css'/>
-
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
-
-    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU" crossorigin="anonymous"/>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/lct.css') }}"/>
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
     <script src="http://rawgithub.com/makeusabrew/bootbox/master/bootbox.js"></script>
-
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/lct.css') }}"/>
     <script>
         function newtopic(boardid) {
             var url = '{{ url_for('newtopic', boardid='') }}';
@@ -45,9 +40,8 @@
             <span class="icon-bar"></span>
           </button>
           <a class="navbar-brand" href="{{ url_for('index') }}">Lean Coffee Table</a>
-            <a class="navbar-brand" style="font-style: italic;"> - {{ param['ctrl']['boardname'] }}</a>
+            <a class="navbar-brand italic"> - {{ param['ctrl']['boardname'] }}</a>
         </div>
-
 
         <div class="collapse navbar-collapse" id="navbar-collapse-3">
           <ul class="nav navbar-nav navbar-right">
@@ -61,6 +55,7 @@
             <li><a href="{{ url_for('about') }}">About</a></li>
           </ul>
         </div>
+
       </div>
     </nav>
 
@@ -80,7 +75,7 @@
                     <div class="card">
                         <a href="#topicmodal" id="nodec" data-target="#topicmodal" data-toggle="modal" data-id="{{ topic['heading'] }}|{{ topic['description'] }}|{{ topic['numvote'] }}" class="modaltopic">
                             <div class="card-img-top" style="background-color:rgba(22, 160, 133, 0.1) " id="topimg">
-                                <center><i class="fa fa-comments" style="color:#16A085"></i></center>
+                                <center><i class="fas fa-comments" style="color:#16A085"></i></center>
                             </div>
                             <div class="card-block">
                                 <div class="card-block-header">

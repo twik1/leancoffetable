@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
  
@@ -6,19 +5,19 @@
     <title>Lean Coffee Table</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+
     <link href='http://fonts.googleapis.com/css?family=Aldrich' rel='stylesheet' type='text/css'/>
     <link href='http://fonts.googleapis.com/css?family=Roboto' rel='stylesheet' type='text/css'/>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU" crossorigin="anonymous"/>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/lct.css') }}"/>
 
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.1/css/font-awesome.min.css"/>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
-
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/lct.css') }}"/>
+    <script src="http://rawgithub.com/makeusabrew/bootbox/master/bootbox.js"></script>
 </head>
       
 <body>
-
     <nav class="navbar navbar-inverse navbar-fixed-top">
       <div class="container-fluid">
         <div class="navbar-header">
@@ -30,7 +29,6 @@
           </button>
           <a class="navbar-brand" href="#">Lean Coffee Table</a>
         </div>
-
 
         <div class="collapse navbar-collapse" id="navbar-collapse-3">
           <ul class="nav navbar-nav navbar-right">
@@ -44,9 +42,9 @@
             <li><a href="{{ url_for('about') }}">About</a></li>
           </ul>
         </div>
+
       </div>
     </nav>
-
 
     <div class="container-fluid">
         <form class="form-horizontal" role="form" method="POST" action="/user.html">
@@ -64,7 +62,7 @@
                     <div class="col-md-3"></div>
                     <label class="control-lable col-md-1" for="user">Username</label>
                     <div class="input-group col-md-3">
-                        <div class="input-group-addon" style="width: 2.6rem"><i class="fa fa-user"></i></div>
+                        <div class="input-group-addon" style="width: 2.6rem"><i class="fas fa-user"></i></div>
                         <input type="text" name="user" class="form-control" value="{{ param['ctrl']['sessionname'] }}" id="user" placeholder="Username" required disabled>
                     </div>
                 </div>
@@ -75,7 +73,7 @@
                     <div class="col-md-3"></div>
                     <label class="control-lable col-md-1" for="name">Name</label>
                     <div class="input-group col-md-3">
-                        <div class="input-group-addon" style="width: 2.6rem"><i class="fa fa-user"></i></div>
+                        <div class="input-group-addon" style="width: 2.6rem"><i class="fas fa-user"></i></div>
                         <input type="text" name="name" class="form-control" value="{{ param['ctrl']['name'] }}" id="name" placeholder="Name">
                     </div>
                 </div>
@@ -86,7 +84,7 @@
                     <div class="col-md-3"></div>
                     <label class="control-lable col-md-1" for="name">Email</label>
                     <div class="input-group col-md-3">
-                        <div class="input-group-addon" style="width: 2.6rem"><i class="fa fa-at"></i></div>
+                        <div class="input-group-addon" style="width: 2.6rem"><i class="fas fa-at"></i></div>
                         <input type="email" name="email" class="form-control" value="{{ param['ctrl']['email'] }}" id="email" placeholder="Email" required>
                     </div>
                 </div>
@@ -98,7 +96,7 @@
                     <div class="col-md-3"></div>
                     <label class="control-lable col-md-1" for="password">Password</label>
                     <div class="input-group col-md-3">
-                        <div class="input-group-addon" style="width: 2.6rem"><i class="fa fa-key"></i></div>
+                        <div class="input-group-addon" style="width: 2.6rem"><i class="fas fa-key"></i></div>
                         <input type="password" name="password" class="form-control" id="password" placeholder="Password" required>
                     </div>
                 </div>
@@ -109,7 +107,7 @@
                     <div class="col-md-3"></div>
                     <label class="control-lable col-md-1" for="password">New Password</label>
                     <div class="input-group col-md-3">
-                        <div class="input-group-addon" style="width: 2.6rem"><i class="fa fa-key"></i></div>
+                        <div class="input-group-addon" style="width: 2.6rem"><i class="fas fa-key"></i></div>
                         <input type="password" name="newpassword" class="form-control" id="newpassword" placeholder="New Password">
                     </div>
                 </div>
@@ -120,7 +118,7 @@
                     <div class="col-md-3"></div>
                     <label class="control-lable col-md-1" for="password">Repeat New Password</label>
                     <div class="input-group col-md-3">
-                        <div class="input-group-addon" style="width: 2.6rem"><i class="fa fa-key"></i></div>
+                        <div class="input-group-addon" style="width: 2.6rem"><i class="fas fa-key"></i></div>
                         <input type="password" name="newpassword2" class="form-control" id="newpassword2" placeholder="Repeat New Password">
                     </div>
                 </div>
@@ -129,7 +127,7 @@
             <div class="row" style="padding-top: 1rem">
                 <div class="col-md-4"></div>
                 <div class="col-md-6">
-                    <button type="submit" class="btn btn-success"><i class="fa fa-sign-in"></i> Update</button>
+                    <button type="submit" class="btn btn-success"><i class="fas fa-sign-in"></i> Update</button>
                 </div>
             </div>
         </form>
@@ -139,12 +137,12 @@
         <br>
         {% if 'errormsg' in param['ctrl'] %}
             <div class="alert alert-danger">
-                <strong><i class="fa fa-close fa-lg"></i> </strong>{{ param['ctrl']['errormsg'] }}
+                <strong><i class="fas fa-times fa-lg"></i> </strong>{{ param['ctrl']['errormsg'] }}
             </div>
         {% endif %}
         {% if 'okmsg' in param['ctrl'] %}
             <div class="alert alert-success">
-                <strong><i class="fa fa-check fa-lg"></i> </strong>{{ param['ctrl']['okmsg'] }}
+                <strong><i class="fas fa-check fa-lg"></i> </strong>{{ param['ctrl']['okmsg'] }}
             </div>
         {% endif %}
     </div>

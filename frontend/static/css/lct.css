@@ -95,3 +95,6 @@ html {
 .footer-char-size {
     font-size: 15px;
 }
+.italic {
+    font-style: italic;
+}
