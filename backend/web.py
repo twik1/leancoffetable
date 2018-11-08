@@ -1,5 +1,7 @@
 #!flask/bin/python
 from flask import Flask, abort, request, jsonify, make_response
+from multiprocessing import Process, Queue
+from waitress import serve
 import mysqldb
 import json
 import datetime
@@ -7,16 +9,38 @@ import config
 import time
 import sys
 import subprocess
-from multiprocessing import Process, Queue
+import argparse
 
-LCTVER = '0.8.0'
-CFGDEF = {'mysql_user':'lctusr','mysql_password':'lctpwd', 'mysql_database':'lctdb', 'mysql_host':'127.0.0.1',
-          'listen_address':'127.0.0.1','listen_port':'5000', 'lct_version': LCTVER}
-CFGEMPTY = {'mysql_user':'','mysql_password':'', 'mysql_database':'', 'mysql_host':'',
-          'listen_address':'','listen_port':'', 'lct_version': ''}
-state = {}
+
+# LCTVER = '0.8.0'
+# CFGDEF = {'mysql_user':'lctusr','mysql_password':'lctpwd', 'mysql_database':'lctdb', 'mysql_host':'127.0.0.1',
+#          'listen_address':'127.0.0.1','listen_port':'5000', 'lct_version': LCTVER}
+# CFGEMPTY = {'mysql_user':'','mysql_password':'', 'mysql_database':'', 'mysql_host':'',
+#          'listen_address':'','listen_port':'', 'lct_version': ''}
+# state = {}
 
 app = Flask(__name__)
+
+
+class Daemon:
+    def __init__(self, method):
+        self.q = Queue()
+        self.method = method
+
+    def start(self, argsd):
+        self.p = Process(target=self.method, args=[self.q, argsd])
+        self.p.start()
+        while True:
+            if self.q.empty():  # sleep on queue?
+                time.sleep(1)
+            else:
+                msg = self.q.get()
+                break
+        self.p.terminate()
+
+        if msg == 'restart':
+            args = [sys.executable] + [sys.argv[0]]
+            subprocess.call(args)
 
 
 def check_result(parameterlist):
@@ -314,76 +338,95 @@ def delete_vote(boardid, topicid, voteid):
 
 
 # Maybe use a less specific list for configuration
-@app.route('/lct/api/v1.0/config', methods=['PUT'])
-def update_config():
-    cfgstore = {'mysql_user': request.json.get('mysql_user', ""),
-                'mysql_password': request.json.get('mysql_password', ""),
-                'mysql_database': request.json.get('mysql_database', ""),
-                'mysql_host': request.json.get('mysql_host', ""),
-                'listen_address': request.json.get('listen_address', ""),
-                'listen_port': request.json.get('listen_port', ""),
-                'lct_version': request.json.get('lct_version', ""),
-                }
-    cfg.config_set(cfgstore)
-    return jsonify('success'), 201
+# @app.route('/lct/api/v1.0/config', methods=['PUT'])
+# def update_config():
+#    cfgstore = {'mysql_user': request.json.get('mysql_user', ""),
+#                'mysql_password': request.json.get('mysql_password', ""),
+#                'mysql_database': request.json.get('mysql_database', ""),
+#                'mysql_host': request.json.get('mysql_host', ""),
+#                'listen_address': request.json.get('listen_address', ""),
+#                'listen_port': request.json.get('listen_port', ""),
+#                'lct_version': request.json.get('lct_version', ""),
+#                }
+#    cfg.config_set(cfgstore)
+#    return jsonify('success'), 201
 
 
-@app.route('/lct/api/v1.0/config', methods=['GET'])
-def get_config():
-    cfgstore = CFGEMPTY
-    cfg.config_get(cfgstore)
-    return jsonify(cfgstore)
+# @app.route('/lct/api/v1.0/config', methods=['GET'])
+# def get_config():
+#    cfgstore = CFGEMPTY
+#    cfg.config_get(cfgstore)
+#    return jsonify(cfgstore)
 
 
-def setup(cfgstore):
-    global cfg, dbconnect, state
-    # Configuration
-    cfg = config.Config()
-    cfg.config_get(cfgstore)
-    state['config'] = 'ok'
+# def setup(cfgstore):
+#    global cfg, dbconnect, state
+#    # Configuration
+#    cfg = config.Config()
+#    cfg.config_get(cfgstore)
+#    state['config'] = 'ok'
+#
+#    dbconnect = mysqldb.DBMySQL(cfgstore['mysql_host'], cfgstore['mysql_user'],
+#                                       cfgstore['mysql_password'], cfgstore['mysql_database'])
+#    res = dbconnect.test_connection()
+#    if res == 1:
+#        state['mysql_run'] = 'nok'
+#    else:
+#        state['mysql_run'] = 'ok'
+#    if res == 2:
+#        state['mysql_usrpwd'] = 'nok'
+#    else:
+#        state['mysql_usrpwd'] = 'ok'
+#    if res == 3:
+#        state['mysql_db'] = 'nok'
+#    else:
+#        state['mysql_db'] = 'ok'
+#    if res == 4:
+#        state['mysql_unknow'] = 'nok'
+#    else:
+#        state['mysql_unknow'] = 'ok'
 
-    dbconnect = mysqldb.DBMySQL(cfgstore['mysql_host'], cfgstore['mysql_user'],
-                                       cfgstore['mysql_password'], cfgstore['mysql_database'])
+
+def start_backend(queue, argd):
+    global gqueue
+    global gcfg
+    global dbconnect
+
+    gqueue = queue
+    gcfg = config.Config('.lct', 'lctbackend')
+
+    # Backend listen address and port is taken from start argument
+    # The rest could be configured through web interface
+    gcfg.set_cfg('backend', 'listen_address', argd['addr'])
+    gcfg.set_cfg('backend', 'listen_port', argd['port'])
+
+    gcfg.set_cfg('backend', 'db_host', '127.0.0.1')
+    gcfg.set_cfg('backend', 'db_usr', 'lctusr')
+    gcfg.set_cfg('backend', 'db_pwd', 'lctpwd')
+    gcfg.set_cfg('backend', 'db_name', 'lctdb')
+
+    dbconnect = mysqldb.DBMySQL(gcfg.get_cfg('backend', 'db_host'), gcfg.get_cfg('backend', 'db_usr'),
+                                gcfg.get_cfg('backend', 'db_pwd'), gcfg.get_cfg('backend', 'db_name'))
     res = dbconnect.test_connection()
-    if res == 1:
-        state['mysql_run'] = 'nok'
-    else:
-        state['mysql_run'] = 'ok'
-    if res == 2:
-        state['mysql_usrpwd'] = 'nok'
-    else:
-        state['mysql_usrpwd'] = 'ok'
-    if res == 3:
-        state['mysql_db'] = 'nok'
-    else:
-        state['mysql_db'] = 'ok'
-    if res == 4:
-        state['mysql_unknow'] = 'nok'
-    else:
-        state['mysql_unknow'] = 'ok'
 
+    serve(app, listen=gcfg.get_cfg('backend', 'listen_address') + ':' + gcfg.get_cfg('backend', 'listen_port'))
 
-def start_backend(queue):
-    global some_queue
-    some_queue = queue
-
-    cfgstore = CFGEMPTY
-    setup(cfgstore)
-
-    app.run(debug=True, use_reloader=False, host=cfgstore['listen_address'], port=int(cfgstore['listen_port']))
 
 if __name__ == '__main__':
-    q = Queue()
-    p = Process(target=start_backend, args=[q, ])
-    p.start()
-    while True:
-        if q.empty(): # sleep on queue?
-            time.sleep(1)
-        else:
-            msg = q.get()
-            break
-    p.terminate()
+    backend_parameter = {}
+    parser = argparse.ArgumentParser(description='Lean Coffe Table backend')
+    parser.add_argument('-l', '--listen_address', help='Backend listen address', required=False)
+    parser.add_argument('-p', '--listen_port', help='Backend listen port', required=False)
+    args = parser.parse_args()
 
-    if msg == 'restart':
-        args = [sys.executable] + [sys.argv[0]]
-        subprocess.call(args)
+    if not args.listen_address:
+        backend_parameter['addr'] = '0.0.0.0'
+    else:
+        backend_parameter['addr'] = args.listen_address
+    if not args.listen_port:
+        backend_parameter['port'] = '5000'
+    else:
+        backend_parameter['port'] = args.listen_port
+
+    daemon = Daemon(start_backend)
+    daemon.start(backend_parameter)

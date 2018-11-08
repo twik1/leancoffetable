@@ -1,19 +1,33 @@
-from datetime import datetime
 import platform
 import configparser
 import os
 from pathlib import Path
-from web import LCTVER
-from web import CFGDEF
+CONST_CFGVER = '0.0.2'
 
 
 class Config:
-    def __init__(self):
+    def __init__(self, directory='cfg', filename='config'):
+        """
+        Create a config object with associated file
+
+        On a windows system the config file is created at %APPDATA% dir
+            with a coosen directory and suffix .ini
+        On a Linux system the config file is created at the user dir ~
+            with a coosen directory and suffix .config
+
+        If no file is present a file is created an the version of
+        the config class is added
+
+        :param directory:
+            The direcory created to store the config file
+        :param filename:
+            The filename without the added suffix which is OS dependant
+        """
         self.config = configparser.ConfigParser()
         if platform.system() == "Windows":
-            self.cfgfile = os.getenv('APPDATA') + '\lct\lctbackend.ini'
+            self.cfgfile = os.getenv('APPDATA') + '\\' + directory + '\\' + filename + '.ini'
         else:
-            self.cfgfile = str(Path.home())+'/.lct/lctbackend.config'
+            self.cfgfile = str(Path.home()) + '/' + directory + '/' + filename + '.config'
         cfgdir = os.path.dirname(self.cfgfile)
         if not os.path.exists(cfgdir):
             os.makedirs(cfgdir, 0o755)
@@ -22,64 +36,116 @@ class Config:
             self.cfg_write_close()
         self.config.read(self.cfgfile)
 
-
     def cfg_write_close(self):
+        """
+        Writes the configuration changes and close the file
+
+        :return:
+            Nothing
+        """
         with open(self.cfgfile, 'w') as configfile:
             self.config.write(configfile)
 
+    def add_cfg(self, section, key, value):
+        """
+        Add a configuration option in a section
 
-    def config_set(self, configstore):
-        if 'mysql_user' in configstore.keys():
-            self.config.set('MySql', 'mysql_user', configstore['mysql_user'])
-        if 'mysql_password' in configstore.keys():
-            self.config.set('MySql', 'mysql_password', configstore['mysql_password'])
-        if 'mysql_database' in configstore.keys():
-            self.config.set('MySql', 'mysql_database', configstore['mysql_database'])
-        if 'mysql_host' in configstore.keys():
-            self.config.set('MySql', 'mysql_host', configstore['mysql_host'])
-        if 'listen_address' in configstore.keys():
-            self.config.set('Backend', 'listen_address', configstore['listen_address'])
-        if 'listen_port' in configstore.keys():
-            self.config.set('Backend', 'listen_port', configstore['listen_port'])
-        if 'lct_version' in configstore.keys():
-            self.config.set('Backend', 'lct_version', configstore['lct_version'])
+        If the section doesn't exist it's created
+        :param section:
+            The section for the configuration
+        :param key:
+            The key for the configuration
+        :param value:
+            The value for the key
+        :return:
+            0 for successful configuration add
+            1 if the section/key already exist nothing is updated
+        """
+        if not self.config.has_section(section):
+            self.config.add_section(section)
+        if self.config.has_option(section, key):
+            return 1
+        self.config.set(section, key, value)
+        self.cfg_write_close()
+        return 0
 
+    def upd_cfg(self, section, key, value):
+        """
+        Update a configuration option in a section
 
-    def config_get(self, configstore):
-        while not self.config_get_sub(configstore):
-            pass
+        Update the value of the section/key configuration
 
-    def config_get_sub(self, configstore):
-        global CFGDEF
-        try:
-            if 'mysql_user' in configstore.keys():
-                configstore['mysql_user'] = self.config.get('MySql', 'mysql_user')
-            if 'mysql_password' in configstore.keys():
-                configstore['mysql_password'] = self.config.get('MySql', 'mysql_password')
-            if 'mysql_database' in configstore.keys():
-                configstore['mysql_database'] = self.config.get('MySql', 'mysql_database')
-            if 'mysql_host' in configstore.keys():
-                configstore['mysql_host'] = self.config.get('MySql', 'mysql_host')
-            if 'listen_address' in configstore.keys():
-                configstore['listen_address'] = self.config.get('Backend', 'listen_address')
-            if 'listen_port' in configstore.keys():
-                configstore['listen_port'] = self.config.get('Backend', 'listen_port')
-            if 'lct_version' in configstore.keys():
-                configstore['lct_version'] = self.config.get('Backend', 'lct_version')
-            return True
-        except configparser.NoSectionError as err:
-            self.config.add_section(err.args[0])
-            self.cfg_write_close()
+        :param section:
+            The section for the configuration
+        :param key:
+                The key to be updated
+        :param value:
+            The value to update to
+        :return:
+            0 for successful configuration update
+            1 if the section/key doesn't exist
+        """
+        if not self.config.has_option(section, key):
+            return 1
+        self.config.set(section, key, value)
+        self.cfg_write_close()
+        return 0
+
+    def set_cfg(self, section, key, value):
+        """
+        Force a set of a configuration in a section
+
+        :param section:
+            The section for the configuration
+        :param key:
+            The key to be updated
+        :param value:
+            The value to force set
+        :return:
+            Always 0
+        """
+        if self.upd_cfg(section, key, value) == 1:
+            self.add_cfg(section, key, value)
+        return 0
+
+    def get_cfg(self, section, key):
+        """
+        Get a configuration option in a section by key
+
+        :param section:
+             The section for the configuration
+        :param key:
+            The key to get value for
+        :return:
+            The value for the section, key
+        """
+        if not self.config.has_option(section, key):
             return False
-        except configparser.NoOptionError as err:
-            self.config_set({err.args[0] : CFGDEF[err.args[0]]})
-            self.cfg_write_close()
-            return False
+        return self.config.get(section, key)
 
+    def del_cfg(self, section, key):
+        """
+        Delete a configuration option in a section
 
+        :param section:
+            The section for the configuration
+        :param key:
+            The key to be deleted
+        :return:
+            0 for a successful configuration delete
+            1 if the section/key doesn't exist
+        """
+        if not self.config.has_option(section, key):
+            return 1
+        self.config.remove_option(section, key)
+        # If the option is last in section also remove section
+        self.cfg_write_close()
+        return 0
 
     def config_default(self):
-        global LCTVER
-        self.config.add_section('Backend')
-        self.config.set('Backend', 'lct_version', LCTVER)
-
+        """
+        Add the configs own section and the veriosn for the config class
+        :return:
+        """
+        self.config.add_section('config')
+        self.config.set('config', 'cfgver', CONST_CFGVER)
