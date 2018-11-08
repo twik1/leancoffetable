@@ -58,6 +58,7 @@ def conv_startdate(startdate):
     date_processing = [int(v) for v in date_processing]
     return datetime.datetime(*date_processing)
 
+
 def gabort(msg, resp):
     dbconnect.disconn()
     abort(make_response(jsonify(message=msg), resp))
@@ -76,7 +77,7 @@ def get_users():
 @app.route('/lct/api/v1.0/users', methods=['POST'])
 def add_user():
     dbconnect.conn()
-    if not check_result(['user','password']):
+    if not check_result(['user', 'password']):
         gabort("Missing parameter", 404)
     user = {
         'user': request.json['user'],
@@ -102,7 +103,7 @@ def get_user(user):
 @app.route('/lct/api/v1.0/users/<user>', methods=['PUT'])
 def update_user(user):
     dbconnect.conn()
-    if not check_result(['password','mail']):
+    if not check_result(['password', 'mail']):
         gabort("Missing parameter", 404)
     if not dbconnect.check_user(user):
         gabort("No such user", 404)
@@ -128,6 +129,7 @@ def delete_user(user):
 
 ###########################################################
 
+
 @app.route('/lct/api/v1.0/boards', methods=['GET'])
 def get_boards():
     dbconnect.conn()
@@ -139,7 +141,7 @@ def get_boards():
 @app.route('/lct/api/v1.0/boards', methods=['POST'])
 def add_board():
     dbconnect.conn()
-    if not check_result(['boardname','username','startdate','votenum']):
+    if not check_result(['boardname', 'username', 'startdate', 'votenum']):
         gabort("Missing parameter", 404)
     if not dbconnect.check_user(request.json['username']):
         gabort("No such user", 404)
@@ -170,7 +172,7 @@ def get_board(boardid):
 @app.route('/lct/api/v1.0/boards/<boardid>', methods=['PUT'])
 def update_board(boardid):
     dbconnect.conn()
-    if not check_result(['boardname','username','startdate','votenum']):
+    if not check_result(['boardname', 'username', 'startdate', 'votenum']):
         gabort("Missing parameter", 404)
     if not dbconnect.check_board(boardid):
         gabort("No such board", 404)
@@ -215,7 +217,7 @@ def get_topics(boardid):
 @app.route('/lct/api/v1.0/boards/<boardid>/topics', methods=['POST'])
 def add_topic(boardid):
     dbconnect.conn()
-    if not check_result(['heading','description','username']):
+    if not check_result(['heading', 'description', 'username']):
         gabort("Missing parameter", 404)
     if not dbconnect.check_board(boardid):
         gabort("No such board", 404)
@@ -229,7 +231,6 @@ def add_topic(boardid):
     dbconnect.disconn()
     # ToDo: return topicid
     return jsonify(topic), 201
-
 
 
 @app.route('/lct/api/v1.0/boards/<boardid>/topics/<topicid>', methods=['GET'])
@@ -247,7 +248,7 @@ def get_topic(boardid, topicid):
 @app.route('/lct/api/v1.0/boards/<boardid>/topics/<topicid>', methods=['PUT'])
 def update_topic(boardid, topicid):
     dbconnect.conn()
-    if not check_result(['heading','description','username']):
+    if not check_result(['heading', 'description', 'username']):
         gabort("Missing parameter", 404)
     if not dbconnect.check_board(boardid):
         gabort("No such board", 404)
@@ -265,6 +266,7 @@ def update_topic(boardid, topicid):
     # ToDo: only owning user can update
     # ToDo: return topicid
     return jsonify(topic), 201
+
 
 @app.route('/lct/api/v1.0/boards/<boardid>/topics/<topicid>', methods=['DELETE'])
 def delete_topic(boardid, topicid):
@@ -286,8 +288,8 @@ def get_votes(boardid, topicid):
     if not dbconnect.check_board(boardid):
         gabort("", 400)
     if not dbconnect.check_topic(topicid):
-        gabort("",400)
-    dbvotelist = dbconnect.get_votes(boardid,topicid)
+        gabort("", 400)
+    dbvotelist = dbconnect.get_votes(boardid, topicid)
     dbconnect.disconn()
     return json.dumps(dbvotelist)
 
@@ -315,10 +317,10 @@ def add_vote(boardid, topicid):
 def get_vote(boardid, topicid, voteid):
     dbconnect.conn()
     if not dbconnect.check_board(boardid):
-        gabort("",400)
+        gabort("", 400)
     if not dbconnect.check_topic(topicid):
-        gabort("",400)
-    dbvote = dbconnect.get_vote(topicid,voteid)
+        gabort("", 400)
+    dbvote = dbconnect.get_vote(topicid, voteid)
     if not len(dbvote):
         gabort("No such vote", 404)
     dbconnect.disconn()
