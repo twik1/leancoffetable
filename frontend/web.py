@@ -2,9 +2,39 @@ from flask import Flask, render_template, request, redirect, url_for, session
 import rest
 from flask_session import Session
 from passlib.hash import pbkdf2_sha256
+import argparse
+from waitress import serve
+import config
+from multiprocessing import Process, Queue
+import subprocess
+import time
+import sys
 
 app = Flask(__name__)
+
 sess = Session()
+restapi = rest.CurlREST()
+
+
+class Daemon:
+    def __init__(self, method):
+        self.q = Queue()
+        self.method = method
+
+    def start(self, argsd):
+        self.p = Process(target=self.method, args=[self.q, argsd])
+        self.p.start()
+        while True:
+            if self.q.empty():  # sleep on queue?
+                time.sleep(1)
+            else:
+                msg = self.q.get()
+                break
+        self.p.terminate()
+
+        if msg == 'restart':
+            args = [sys.executable] + [sys.argv[0]]
+            subprocess.call(args)
 
 
 @app.route('/')
@@ -21,7 +51,7 @@ def index():
     return render_template('index.html',param=param)
 
 
-@app.route('/login.html',methods=['GET', 'POST'])
+@app.route('/login.html', methods=['GET', 'POST'])
 def login():
     param = {}
     param['data'] = []
@@ -51,7 +81,7 @@ def login():
         return render_template('login.html', param=param)
 
 
-@app.route('/logout.html',methods=['GET'])
+@app.route('/logout.html', methods=['GET'])
 def logout():
     param = {}
     param['data'] = []
@@ -61,7 +91,7 @@ def logout():
     return render_template('login.html', param=param)
 
 
-@app.route('/newuser.html',methods=['GET', 'POST'])
+@app.route('/newuser.html', methods=['GET', 'POST'])
 def newuser():
     param = {}
     param['data'] = []
@@ -78,7 +108,7 @@ def newuser():
         if restapi.checkuser(user):
             param['ctrl']['errormsg'] = 'User already exist'
             return render_template('newuser.html', param=param)
-        data = {'user': user,'name':name, 'password':password, 'mail':mail}
+        data = {'user': user,'name': name, 'password': password, 'mail': mail}
         ret = restapi.post('http://localhost:5000/lct/api/v1.0/users', data)
         if ret['response'] == 0:
             param['ctrl']['errormsg'] = 'No contact with backend'
@@ -111,7 +141,7 @@ def user():
         param['ctrl']['email'] = ret['datalist'][0]['mail']
         return render_template('user.html', param=param)
     else:
-        #user = request.form['user']
+        # user = request.form['user']
         name = request.form['name']
         mail = request.form['email']
         newpassword = request.form['newpassword']
@@ -144,7 +174,7 @@ def user():
             return render_template('user.html', param=param)
 
 
-@app.route('/newboard',methods=['GET','POST'])
+@app.route('/newboard', methods=['GET', 'POST'])
 def newboard():
     param = {}
     param['data'] = []
@@ -162,14 +192,14 @@ def newboard():
             votenum = '0'
         if startdate == '':
             startdate = '1970-01-01T00:00'
-        data = {'username':username,'boardname':boardname,'startdate':startdate,'votenum':votenum}
+        data = {'username':username, 'boardname':boardname, 'startdate':startdate, 'votenum':votenum}
         if restapi.post('http://localhost:5000/lct/api/v1.0/boards', data):
             return redirect(url_for('index'))
         else:
             param['ctrl']['errormsg'] = 'No contact with backend'
             return render_template('error.html', param=param)
     else:
-        return render_template('newboard.html',param=param)
+        return render_template('newboard.html', param=param)
 
 
 @app.route('/delboard/<boardid>')
@@ -209,7 +239,7 @@ def delboard(boardid):
 @app.route('/board/<boardid>')
 def board(boardid):
     param = {}
-    param ['ctrl'] ={}
+    param['ctrl'] ={}
     param['ctrl']['boardid'] = boardid
     if 'username' in session.keys():
         param['ctrl']['loggedin'] = 'yes'
@@ -234,20 +264,20 @@ def newtopic(boardid):
         topicheading = request.form['topicheading']
         topicdesc = request.form['topicdesc']
         boardid = request.form['boardid']
-        data = {'heading':topicheading,'description':topicdesc,'username':session['username']}
+        data = {'heading':topicheading, 'description':topicdesc, 'username':session['username']}
         if restapi.post('http://localhost:5000/lct/api/v1.0/boards/'+boardid+'/topics', data):
-            return redirect(url_for('board',boardid=boardid))
+            return redirect(url_for('board', boardid=boardid))
         else:
             param['ctrl']['errormsg'] = 'No contact with backend'
             return render_template('error.html', param=param)
     else:
-        return render_template('newtopic.html',param=param)
+        return render_template('newtopic.html', param=param)
 
 
-@app.route('/boards/<boardid>/deltopic/<topicid>',methods=['GET'])
+@app.route('/boards/<boardid>/deltopic/<topicid>', methods=['GET'])
 def deltopic(boardid, topicid):
     param = {}
-    param ['ctrl'] ={}
+    param['ctrl'] = {}
     if 'username' in session.keys():
         param['ctrl']['loggedin'] = 'yes'
         param['ctrl']['sessionname'] = session['username']
@@ -271,13 +301,13 @@ def deltopic(boardid, topicid):
                 param['ctrl']['errormsg'] = 'No such board'
                 return render_template('error.html', param=param)
             else:
-                return redirect(url_for('board',boardid=boardid))
+                return redirect(url_for('board', boardid=boardid))
     else:
         param['ctrl']['errormsg'] = 'You need to be logged in to delete a board'
         return render_template('error.html', param=param)
 
 
-@app.route('/boards/<boardid>/topics/<topicid>/votes',methods=['GET'])
+@app.route('/boards/<boardid>/topics/<topicid>/votes', methods=['GET'])
 def newvote(boardid, topicid):
     if 'username' in session.keys():
         data = {'user': session['username'], 'topicid': topicid}
@@ -285,28 +315,28 @@ def newvote(boardid, topicid):
     return redirect(url_for('board', boardid=boardid))
 
 
-@app.route('/boards/<boardid>/topics/<topicid>/votes/<voteid>',methods=['GET'])
+@app.route('/boards/<boardid>/topics/<topicid>/votes/<voteid>', methods=['GET'])
 def delvote(boardid, topicid, voteid):
     if 'username' in session.keys():
         ret = restapi.delvote(boardid, topicid, voteid, session['username'])
-        #ret = restapi.delete('http://localhost:5000/lct/api/v1.0/boards/'+boardid+'/topics/'+topicid+'/votes/'+voteid)
+        # ret = restapi.delete('http://localhost:5000/lct/api/v1.0/boards/'+boardid+'/topics/'+topicid+'/votes/'+voteid)
     return redirect(url_for('board', boardid=boardid))
 
 
-@app.route('/about.html',methods=['GET'])
+@app.route('/about.html', methods=['GET'])
 def about():
     param = {}
-    param ['ctrl'] ={}
+    param['ctrl'] = {}
     if 'username' in session.keys():
         param['ctrl']['loggedin'] = 'yes'
         param['ctrl']['sessionname'] = session['username']
     return render_template('about.html', param=param)
 
 
-@app.route('/setup.html',methods=['GET'])
+@app.route('/setup.html', methods=['GET'])
 def setup():
     param = {}
-    param ['ctrl'] ={}
+    param['ctrl'] = {}
     if 'username' in session.keys():
         param['ctrl']['loggedin'] = 'yes'
         param['ctrl']['sessionname'] = session['username']
@@ -317,11 +347,42 @@ def setup():
     return render_template('setup.html', param=param)
 
 
-if __name__ == '__main__':
+def start_frontend(queue, argd):
+    global gqueue
+    global gcfg
+
+    gqueue = queue
+    gcfg = config.Config('.lct', 'lctfrontend')
+
+    # Frontend listen address and port is taken from start argument
+    # The rest could be configured through web interface
+    gcfg.set_cfg('frontend', 'listen_address', argd['addr'])
+    gcfg.set_cfg('frontend', 'listen_port', argd['port'])
+    gcfg.set_cfg('frontend', 'backend_host', '0.0.0.0')
+    gcfg.set_cfg('frontend', 'backend_port', '5000')
+
     app.secret_key = 'super secret key'
     app.config['SESSION_TYPE'] = 'filesystem'
-
     sess.init_app(app)
 
-    restapi = rest.CurlREST()
-    app.run(debug=True, host='192.168.0.200', port=5050)
+    serve(app, listen=gcfg.get_cfg('frontend', 'listen_address') + ':' + gcfg.get_cfg('frontend', 'listen_port'))
+
+
+if __name__ == '__main__':
+    frontend_parameter = {}
+    parser = argparse.ArgumentParser(description='Lean Coffe Table frontend')
+    parser.add_argument('-l', '--listen_address', help='Frontend listen address', required=False)
+    parser.add_argument('-p', '--listen_port', help='Frontend listen port', required=False)
+    args = parser.parse_args()
+
+    if not args.listen_address:
+        frontend_parameter['addr'] = '0.0.0.0'
+    else:
+        frontend_parameter['addr'] = args.listen_address
+    if not args.listen_port:
+        frontend_parameter['port'] = '5050'
+    else:
+        frontend_parameter['port'] = args.listen_port
+
+    daemon = Daemon(start_frontend)
+    daemon.start(frontend_parameter)
