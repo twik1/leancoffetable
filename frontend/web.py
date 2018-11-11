@@ -49,7 +49,7 @@ def index():
         param['ctrl']['errormsg'] = 'No contact with backend'
         return render_template('error', param=param)
 
-    return render_template('index',param=param)
+    return render_template('index', param=param)
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -101,7 +101,7 @@ def newuser():
         if restapi.checkuser(user):
             param['ctrl']['errormsg'] = 'User already exist'
             return render_template('newuser', param=param)
-        data = {'user': user,'name': name, 'password': password, 'mail': mail}
+        data = {'user': user, 'name': name, 'password': password, 'mail': mail}
         # ret = restapi.post('http://localhost:5000/lct/api/v1.0/users', data)
         ret = restapi.adduser(data)
         if ret == 0:
@@ -116,56 +116,54 @@ def newuser():
         return render_template('newuser', param=param)
 
 
-@app.route('/user.html',methods=['GET', 'POST'])
+@app.route('/user', methods=['GET', 'POST'])
 def user():
-    param = {}
-    param['data'] = []
-    param['ctrl'] = {}
-    if not 'username' in session.keys():
+    param = {'data': [], 'ctrl': {}}
+    if 'username' not in session.keys():
         param['ctrl']['errormsg'] = 'You are not logged in'
-        return render_template('error.html', param=param)
+        return render_template('error', param=param)
     param['ctrl']['loggedin'] = 'yes'
     param['ctrl']['sessionname'] = session['username']
     if request.method == 'GET':
-        ret = restapi.get('http://localhost:5000/lct/api/v1.0/users/'+session['username'])
-        if ret['response'] == 0:
+        ret = restapi.getuser(param, session['username'])
+        # ret = restapi.get('http://localhost:5000/lct/api/v1.0/users/'+session['username'])
+        if ret == 0:
             param['ctrl']['errormsg'] = 'No contact with backend'
-            return render_template('error.html', param=param)
-        param['ctrl']['name'] = ret['datalist'][0]['name']
-        param['ctrl']['email'] = ret['datalist'][0]['mail']
-        return render_template('user.html', param=param)
+            return render_template('error', param=param)
+        param['ctrl']['name'] = param['data'][0]['name']
+        param['ctrl']['email'] = param['data'][0]['mail']
+        return render_template('user', param=param)
     else:
-        # user = request.form['user']
         name = request.form['name']
         mail = request.form['email']
         newpassword = request.form['newpassword']
         newpassword2 = request.form['newpassword2']
-        ret = restapi.get('http://localhost:5000/lct/api/v1.0/users/'+session['username'])
-        if ret['response'] == 0:
+        ret = restapi.getuser(param, session['username'])
+        if ret == 0:
             param['ctrl']['errormsg'] = 'No contact with backend'
-            return render_template('error.html', param=param)
-        if pbkdf2_sha256.verify(request.form['password'], ret['datalist'][0]['password']):
+            return render_template('error', param=param)
+        param['ctrl']['sessionname'] = session['username']
+        param['ctrl']['name'] = name
+        param['ctrl']['email'] = mail
+        if pbkdf2_sha256.verify(request.form['password'], param['data'][0]['password']):
             if len(newpassword) or len(newpassword2):
                 if not newpassword == newpassword2:
                     param['ctrl']['errormsg'] = 'New Password and Repeat New Password doesnt match'
-                    return render_template('user.html', param=param)
+                    return render_template('user', param=param)
                 password = pbkdf2_sha256.encrypt(newpassword, rounds=200000, salt_size=16)
             else:
-                password = ret['datalist'][0]['password']
+                password = param['data'][0]['password']
             user = session['username']
             data = {'user': user, 'name': name, 'password': password, 'mail': mail}
-            ret = restapi.post('http://localhost:5000/lct/api/v1.0/users', data)
-            if ret['response'] == 0:
+            ret = restapi.updateuser(data)
+            if ret == 0:
                 param['ctrl']['errormsg'] = 'No contact with backend'
                 return render_template('error.html', param=param)
-            param['ctrl']['sessionname'] = session['username']
-            param['ctrl']['name'] = name
-            param['ctrl']['email'] = mail
             param['ctrl']['okmsg'] = 'Values has been updated'
-            return render_template('user.html', param=param)
+            return render_template('user', param=param)
         else:
             param['ctrl']['errormsg'] = 'Faulty password'
-            return render_template('user.html', param=param)
+            return render_template('user', param=param)
 
 
 @app.route('/newboard', methods=['GET', 'POST'])

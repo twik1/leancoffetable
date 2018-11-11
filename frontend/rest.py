@@ -96,6 +96,9 @@ class CurlREST:
         usr = self.post(self.baseurl + "users", data)
         return usr['response']
 
+    def updateuser(self, data):
+        return self.adduser(data)
+
     def gettopics(self, boardid, datastore):
         """
         Get all topic data for a specific boardid
