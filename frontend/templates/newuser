@@ -48,7 +48,7 @@
     </nav>
 
     <div class="container-fluid">
-        <form class="form-horizontal" role="form" method="POST" action="/newuser.html">
+        <form class="form-horizontal" role="form" method="POST" action="/newuser">
             <div class="row">
                 <div class="col-md-5"></div>
                 <div class="col-md-3">
@@ -107,7 +107,7 @@
                 <div class="col-md-4"></div>
                 <div class="col-md-6">
                     <button type="submit" class="btn btn-success"><i class="fas fa-sign-in"></i> Register</button>
-                    <a class="btn btn-link" href="/login.html">Login?</a>
+                    <a class="btn btn-link" href="/login">Login?</a>
                 </div>
             </div>
         </form>

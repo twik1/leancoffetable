@@ -82,7 +82,7 @@
                 <div class="col-md-4"></div>
                 <div class="col-md-6">
                     <button type="submit" class="btn btn-success"><i class="fas fa-sign-in"></i> Login</button>
-                    <a class="btn btn-link" href="/newuser.html">Register new user?</a>
+                    <a class="btn btn-link" href="/newuser">Register new user?</a>
                 </div>
             </div>
         </form>

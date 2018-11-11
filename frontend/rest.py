@@ -48,7 +48,6 @@ class CurlREST:
             response['response'] = 0
             return response
 
-
     def post(self, url, param):
         response = {}
         try:
@@ -59,7 +58,6 @@ class CurlREST:
             response['response'] = 0
             return response
 
-
     def delete(self, url):
         response = {}
         try:
@@ -69,7 +67,6 @@ class CurlREST:
         except requests.exceptions.RequestException as e:
             response['response'] = 0
             return response
-
 
     def getboards(self, param):
         """
@@ -88,12 +85,15 @@ class CurlREST:
                 param['data'].append(board['datalist'][0])
         return ids['response']
 
-
     def getuser(self, param, user):
         usr = self.get(self.baseurl + "users/" + user)
         param['ctrl']['response'] = usr['response']
         if 'datalist' in usr:
             param['data'].append(usr['datalist'][0])
+        return usr['response']
+
+    def adduser(self, data):
+        usr = self.post(self.baseurl + "users", data)
         return usr['response']
 
     def gettopics(self, boardid, datastore):
