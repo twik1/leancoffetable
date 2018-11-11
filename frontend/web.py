@@ -36,59 +36,57 @@ class Daemon:
             args = [sys.executable] + [sys.argv[0]]
             subprocess.call(args)
 
-
+@app.route('/index')
 @app.route('/')
 def index():
-    param = restapi.getboards()
+    param = {'data': [], 'ctrl': {}}
     if 'username' in session.keys():
         param['ctrl']['loggedin'] = 'yes'
         param['ctrl']['sessionname'] = session['username']
-
+    restapi.getboards(param)
     if param['ctrl']['response'] == 0:
         param['ctrl']['errormsg'] = 'No contact with backend'
-        return render_template('error.html', param=param)
+        return render_template('error', param=param)
 
-    return render_template('index.html',param=param)
+    return render_template('index',param=param)
 
 
-@app.route('/login.html', methods=['GET', 'POST'])
+@app.route('/login', methods=['GET', 'POST'])
 def login():
-    param = {}
-    param['data'] = []
-    param['ctrl'] = {}
+    param = {'data': [], 'ctrl': {}}
     if 'username' in session.keys():
         param['ctrl']['loggedin'] = 'yes'
         param['ctrl']['sessionname'] = session['username']
-
     if request.method == 'POST':
-        ret = restapi.get('http://localhost:5000/lct/api/v1.0/users/'+request.form['user'])
-        if ret['response'] == 0:
+        ret = restapi.getuser(param, request.form['user'])
+        # ret = restapi.get('http://localhost:5000/lct/api/v1.0/users/'+request.form['user'])
+        if ret == 0:
             param['ctrl']['errormsg'] = 'No contact with backend'
             return render_template('error.html', param=param)
-        if not ret['response'] == 200:
+        if not ret == 200:
             param['ctrl']['errormsg'] = 'Faulty user or password'
-            return render_template('login.html', param=param)
+            return render_template('login', param=param)
         else:
             #if ret['datalist'][0]['password'] == request.form['password']:
-            if pbkdf2_sha256.verify(request.form['password'], ret['datalist'][0]['password']):
+            if pbkdf2_sha256.verify(request.form['password'], param['data'][0]['password']):
                 session['username'] = request.form['user']
                 param['ctrl']['loggedin'] = 'yes'
                 return redirect(url_for('index'))
             else:
                 param['ctrl']['errormsg'] = 'Faulty user or password'
-                return render_template('login.html', param=param)
+                return render_template('login', param=param)
     else:
-        return render_template('login.html', param=param)
+        return render_template('login', param=param)
 
 
-@app.route('/logout.html', methods=['GET'])
+@app.route('/logout', methods=['GET'])
 def logout():
     param = {}
     param['data'] = []
     param['ctrl'] = {}
     if 'username' in session.keys():
         session.pop('username')
-    return render_template('login.html', param=param)
+    return render_template('login', param=param)
 
 
 @app.route('/newuser.html', methods=['GET', 'POST'])

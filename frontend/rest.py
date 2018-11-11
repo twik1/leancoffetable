@@ -29,6 +29,14 @@ class CurlREST:
 
 
     def get(self, url):
+        """
+        Executes REST API call to specific url
+        :param url:
+            The url to do a get towards
+        :return:
+            A dictionary with {response: <result of the http get>,
+            if successful a list of dictionaries
+        """
         response = {}
         try:
             ret = requests.get(url, headers=self.headers)
@@ -63,18 +71,30 @@ class CurlREST:
             return response
 
 
-    def getboards(self):
-        datastore = {}
-        datastore['data'] = []
-        datastore['ctrl'] = {}
+    def getboards(self, param):
+        """
+        Get boards available for user
+        :param param:
+            A datastructure to fill in for the function
+        :return:
+            The result of the REST http get request
+            ToDo: we can add more respons if something fail
+        """
         ids = self.get(self.baseurl+"boards")
-        datastore['ctrl']['response'] = ids['response']
+        param['ctrl']['response'] = ids['response']
         if 'datalist' in ids:
             for id in ids['datalist']:
                 board = self.get(self.baseurl+'boards/'+str(id['boardid']))
-                datastore['data'].append(board['datalist'][0])
-        return datastore
+                param['data'].append(board['datalist'][0])
+        return ids['response']
 
+
+    def getuser(self, param, user):
+        usr = self.get(self.baseurl + "users/" + user)
+        param['ctrl']['response'] = usr['response']
+        if 'datalist' in usr:
+            param['data'].append(usr['datalist'][0])
+        return usr['response']
 
     def gettopics(self, boardid, datastore):
         """
