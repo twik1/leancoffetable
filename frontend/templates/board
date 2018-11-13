@@ -48,7 +48,7 @@
             <li><a href="{{ url_for('index') }}">Home</a></li>
             {% if param['ctrl']['loggedin'] == 'yes' %}
             <li><a href="{{ url_for('logout') }}">Logout</a></li>
-            <li><a href="{{ url_for('user') }}">User</a></li>
+            <li><a href="{{ url_for('eduser') }}">User</a></li>
             {% else %}
             <li><a href="{{ url_for('login') }}">Login</a></li>
             {% endif %}
@@ -97,13 +97,13 @@
                                                 {% endif %}
                                             </td>
                                             <td class="text-right" style="width: 50%;">
-                                                {% if (param['ctrl']['myvote'] != 0) and (topic['myvotes'] != 0) %}
+                                                {% if (param['ctrl']['myboardvotes'] != 0) and (topic['mytopicvotes'] != 0) %}
                                                     <a href="#" class="btn tooltips" onclick="location.href='{{ url_for('delvote',boardid=topic['boardid'],topicid=topic['topicid'],voteid=0) }}';" title="Remove vote">
                                                         <span class="fas fa-minus"></span>
                                                     </a>
                                                 {% endif %}
 
-                                                {% if (param['ctrl']['myvote'] < param['ctrl']['votenum']) or (param['ctrl']['votenum'] == 0) %}
+                                                {% if (param['ctrl']['myboardvotes'] < param['ctrl']['votenum']) or (param['ctrl']['votenum'] == 0) %}
                                                     <a href="#" class="btn tooltips" onclick="location.href='{{ url_for('newvote',boardid=topic['boardid'],topicid=topic['topicid']) }}';" title="Add vote">
                                                         <span class="fas fa-plus"></span>
                                                     </a>
@@ -111,7 +111,7 @@
                                             </td>
                                         {% endif %}
                                         <td class="text-right" style="width: 45%;">
-                                            <span>{{ topic['numvote'] }}({{ topic['myvotes'] }}) Votes</span>
+                                            <span>{{ topic['topicvotes'] }}({{ topic['mytopicvotes'] }}) Votes</span>
                                         </td>
                                     </tr>
                                 </table>

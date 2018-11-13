@@ -35,7 +35,7 @@
             <li><a href="{{ url_for('index') }}">Home</a></li>
             {% if param['ctrl']['loggedin'] == 'yes' %}
             <li><a href="{{ url_for('logout') }}">Logout</a></li>
-            <li><a href="{{ url_for('user') }}">User</a></li>
+            <li><a href="{{ url_for('eduser') }}">User</a></li>
             {% else %}
             <li><a href="{{ url_for('login') }}">Login</a></li>
             {% endif %}

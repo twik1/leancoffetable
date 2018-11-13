@@ -4,12 +4,12 @@ import json
 
 class CurlREST:
     def __init__(self):
-        self.headers = {'Content-Type':'application/json'}
+        self.headers = {'Content-Type': 'application/json'}
         self.baseurl = 'http://localhost:5000/lct/api/v1.0/'
 
     def sortlist(self, list):
         if len(list) == 0:
-            #Nothing to sort
+            # Nothing to sort
             return list
         newlist = []
         i = 0
@@ -85,6 +85,20 @@ class CurlREST:
                 param['data'].append(board['datalist'][0])
         return ids['response']
 
+    def addboard(self, data):
+        res = self.post(self.baseurl + "boards", data)
+        return res['response']
+
+    def getboard(self, param, boardid):
+        board = self.get(self.baseurl + 'boards/' + boardid)
+        if 'datalist' in board:
+            param['data'].append(board['datalist'][0])
+        return board['response']
+
+    def delboard(self, boardid):
+        res = self.delete(self.baseurl + 'boards/' + boardid)
+        return res['response']
+
     def getuser(self, param, user):
         usr = self.get(self.baseurl + "users/" + user)
         param['ctrl']['response'] = usr['response']
@@ -93,64 +107,11 @@ class CurlREST:
         return usr['response']
 
     def adduser(self, data):
-        usr = self.post(self.baseurl + "users", data)
-        return usr['response']
+        res = self.post(self.baseurl + "users", data)
+        return res['response']
 
     def updateuser(self, data):
         return self.adduser(data)
-
-    def gettopics(self, boardid, datastore):
-        """
-        Get all topic data for a specific boardid
-
-        :param boardid:
-            Id of a specific board <1>
-        :param datastore:
-            A dictionary of {ctrl:{loggedin:<yes/no>, sessionname:<twik>,boardid:<1>}
-        :return:
-            More parameters for datastore
-            {ctrl:{votenum:<3>,boardname:<name>,
-            {data:{
-        """
-        datastore['data'] = []
-        index = 0
-        board = self.get(self.baseurl + 'boards/' + boardid)
-        datastore['ctrl']['votenum'] = board['datalist'][0]['votenum']
-        datastore['ctrl']['boardname'] = board['datalist'][0]['name']
-#        if 'datalist' in board:
-#            datastore['ctrl']['user'] = board['datalist'][0]['user']
-
-        ids = self.get(self.baseurl+"boards/"+boardid+'/topics')
-        datastore['ctrl']['response'] = ids['response']
-
-        myvote = 0  # Total number of votes for me of the entire board
-        if 'datalist' in ids:
-            for id in ids['datalist']:  # Loop through topics
-                #thumbsup = 0
-                numvote = 0  # Total number of votes for each topic
-                topic = self.get(self.baseurl+'boards/'+boardid+'/topics/'+str(id['topicid']))
-                datastore['data'].append(topic['datalist'][0])
-                # Handle votes
-                vids = self.get(self.baseurl+"boards/"+boardid+'/topics/'+str(id['topicid'])+'/votes')
-                if 'datalist' in vids:
-                    myvotes = 0  # Total number of of votes for me for each topic
-                    for ids in vids['datalist']:
-                        vote = self.get(self.baseurl+"boards/"+boardid+'/topics/'+str(id['topicid'])+'/votes/'+str(ids['voteid']))
-                        #if 'datalist' in vote:
-                        if 'sessionname' in datastore['ctrl']:
-                            if datastore['ctrl']['sessionname'] == vote['datalist'][0]['user']:
-                                #datastore['data'][index]['thumbsup'] = str(ids['voteid'])
-                                myvotes = myvotes + 1
-                                myvote = myvote + 1
-                        numvote = numvote + 1
-                    datastore['data'][index]['myvotes'] = myvotes
-                datastore['data'][index]['numvote'] = numvote
-                index = index + 1
-        # Only sort on request
-        #sortedlist = self.sortlist(datastore['data'])
-        #datastore['data'] = sortedlist
-        datastore['ctrl']['myvote'] = myvote
-        return datastore
 
     def checkuser(self, user):
         ids = self.get(self.baseurl + "users/" + user)
@@ -158,6 +119,57 @@ class CurlREST:
             return True
         else:
             return False
+
+    # ToDo: Split this function up and have logic in web
+    def gettopics(self, param, boardid):
+        # datastore['data'] = []
+        index = 0
+        # board = self.get(self.baseurl + 'boards/' + boardid)
+        res = self.getboard(param, boardid)
+        # ToDO: Return on fail
+        param['ctrl']['votenum'] = param['data'][0]['votenum']
+        param['ctrl']['boardname'] = param['data'][0]['name']
+        param['ctrl']['boardid'] = boardid
+#        if 'datalist' in board:
+#            datastore['ctrl']['user'] = board['datalist'][0]['user']
+        param['data'] = [] # Clear data from getboard run
+        ids = self.get(self.baseurl+"boards/"+boardid+'/topics')
+        # ToDO: Return on fail
+        param['ctrl']['response'] = ids['response']
+        myboardvotes = 0  # Total number of votes for me of the entire board
+        if 'datalist' in ids:
+            for id in ids['datalist']:  # Loop through topics
+                topicvotes = 0  # Total number of votes for each topic
+                mytopicvotes = 0  # Total number of of votes for me for each topic
+                topic = self.get(self.baseurl+'boards/'+boardid+'/topics/'+str(id['topicid']))
+                # ToDO: Return on fail
+                param['data'].append(topic['datalist'][0])
+                # Handle votes
+                vids = self.get(self.baseurl+"boards/"+boardid+'/topics/'+str(id['topicid'])+'/votes')
+                # ToDO: Return on fail
+                if 'datalist' in vids:
+                    for ids in vids['datalist']:
+                        vote = self.get(self.baseurl+"boards/"+boardid+'/topics/'+str(id['topicid'])+'/votes/'+str(ids['voteid']))
+                        # ToDO: Return on fail
+                        #if 'datalist' in vote:
+                        if 'sessionname' in param['ctrl']:
+                            if param['ctrl']['sessionname'] == vote['datalist'][0]['user']:
+                                #datastore['data'][index]['thumbsup'] = str(ids['voteid'])
+                                mytopicvotes = mytopicvotes + 1
+                                myboardvotes = myboardvotes + 1
+                        topicvotes = topicvotes + 1
+                    param['data'][index]['topicvotes'] = topicvotes
+                param['data'][index]['mytopicvotes'] = mytopicvotes
+                index = index + 1
+        # Only sort on request
+        # sortedlist = self.sortlist(datastore['data'])
+        # datastore['data'] = sortedlist
+        param['ctrl']['myboardvotes'] = myboardvotes
+        return param['ctrl']['response']
+
+    def addtopic(self, param, boardid, data):
+        res = self.post(self.baseurl + "boards/" + boardid + "/topics", data)
+        return res['response']
 
     def getconfig(self, param):
         ids = self.get(self.baseurl+"config")
