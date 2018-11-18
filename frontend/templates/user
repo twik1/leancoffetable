@@ -47,7 +47,7 @@
     </nav>
 
     <div class="container-fluid">
-        <form class="form-horizontal" role="form" method="POST" action="/user">
+        <form class="form-horizontal" role="form" method="POST" action="/eduser">
             <div class="row">
                 <div class="col-md-5"></div>
                 <div class="col-md-3">

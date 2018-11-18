@@ -37,15 +37,26 @@ class Daemon:
             subprocess.call(args)
 
 
+def update_session(param):
+    if 'username' in session.keys():
+        param['ctrl']['loggedin'] = 'yes'
+        param['ctrl']['sessionname'] = session['username']
+        return True
+    return False
+
 @app.route('/index', methods=['GET'])
 @app.route('/', methods=['GET'])
 def index():
     param = {'data': [], 'ctrl': {}}
-    if 'username' in session.keys():
-        param['ctrl']['loggedin'] = 'yes'
-        param['ctrl']['sessionname'] = session['username']
-    restapi.getboards(param)
-    if param['ctrl']['response'] == 0:
+    update_session(param)
+    shadow1 = restapi.getboards()
+    # ToDO: Check return
+    for ids in shadow1['data']:
+        shadow2 = restapi.getboard(ids)
+        # ToDO: Check return
+        param['data'].append(shadow2['data'][0])
+
+    if shadow1['result'] == 0:
         param['ctrl']['errormsg'] = 'No contact with backend'
         return render_template('error', param=param)
 
@@ -55,19 +66,17 @@ def index():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     param = {'data': [], 'ctrl': {}}
-    if 'username' in session.keys():
-        param['ctrl']['loggedin'] = 'yes'
-        param['ctrl']['sessionname'] = session['username']
+    update_session(param)
     if request.method == 'POST':
-        ret = restapi.getuser(param, request.form['user'])
-        if ret == 0:
+        shadow1 = restapi.getuser(request.form['user'])
+        if shadow1['result'] == 0:
             param['ctrl']['errormsg'] = 'No contact with backend'
             return render_template('error.html', param=param)
-        if not ret == 200:
+        if not shadow1['result'] == 200:
             param['ctrl']['errormsg'] = 'Faulty user or password'
             return render_template('login', param=param)
         else:
-            if pbkdf2_sha256.verify(request.form['password'], param['data'][0]['password']):
+            if pbkdf2_sha256.verify(request.form['password'], shadow1['data'][0]['password']):
                 session['username'] = request.form['user']
                 param['ctrl']['loggedin'] = 'yes'
                 return redirect(url_for('index'))
@@ -89,10 +98,7 @@ def logout():
 @app.route('/newuser', methods=['GET', 'POST'])
 def newuser():
     param = {'data': [], 'ctrl': {}}
-    if 'username' in session.keys():
-        param['ctrl']['loggedin'] = 'yes'
-        param['ctrl']['sessionname'] = session['username']
-
+    update_session(param)
     if request.method == 'POST':
         user = request.form['user']
         name = request.form['name']
@@ -102,12 +108,11 @@ def newuser():
             param['ctrl']['errormsg'] = 'User already exist'
             return render_template('newuser', param=param)
         data = {'user': user, 'name': name, 'password': password, 'mail': mail}
-        # ret = restapi.post('http://localhost:5000/lct/api/v1.0/users', data)
-        ret = restapi.adduser(data)
-        if ret == 0:
+        shadow1 = restapi.adduser(data)
+        if shadow1['result'] == 0:
             param['ctrl']['errormsg'] = 'No contact with backend'
             return render_template('error', param=param)
-        if ret == 201:
+        if shadow1['result'] == 201:
             session['username'] = request.form['user']
             param['ctrl']['loggedin'] = 'yes'
             param['ctrl']['sessionname'] = session['username']
@@ -125,40 +130,39 @@ def eduser():
     param['ctrl']['loggedin'] = 'yes'
     param['ctrl']['sessionname'] = session['username']
     if request.method == 'GET':
-        ret = restapi.getuser(param, session['username'])
-        # ret = restapi.get('http://localhost:5000/lct/api/v1.0/users/'+session['username'])
-        if ret == 0:
+        shadow1 = restapi.getuser(session['username'])
+        if shadow1['result'] == 0:
             param['ctrl']['errormsg'] = 'No contact with backend'
             return render_template('error', param=param)
-        param['ctrl']['name'] = param['data'][0]['name']
-        param['ctrl']['email'] = param['data'][0]['mail']
+        param['ctrl']['name'] = shadow1['data'][0]['name']
+        param['ctrl']['email'] = shadow1['data'][0]['mail']
         return render_template('user', param=param)
     else:
         name = request.form['name']
         mail = request.form['email']
         newpassword = request.form['newpassword']
         newpassword2 = request.form['newpassword2']
-        ret = restapi.getuser(param, session['username'])
-        if ret == 0:
+        shadow1 = restapi.getuser(session['username'])
+        if shadow1['result'] == 0:
             param['ctrl']['errormsg'] = 'No contact with backend'
             return render_template('error', param=param)
         param['ctrl']['sessionname'] = session['username']
         param['ctrl']['name'] = name
         param['ctrl']['email'] = mail
-        if pbkdf2_sha256.verify(request.form['password'], param['data'][0]['password']):
+        if pbkdf2_sha256.verify(request.form['password'], shadow1['data'][0]['password']):
             if len(newpassword) or len(newpassword2):
                 if not newpassword == newpassword2:
                     param['ctrl']['errormsg'] = 'New Password and Repeat New Password doesnt match'
                     return render_template('user', param=param)
                 password = pbkdf2_sha256.encrypt(newpassword, rounds=200000, salt_size=16)
             else:
-                password = param['data'][0]['password']
+                password = shadow1['data'][0]['password']
             user = session['username']
             data = {'user': user, 'name': name, 'password': password, 'mail': mail}
-            ret = restapi.updateuser(data)
-            if ret == 0:
+            shadow1 = restapi.updateuser(data)
+            if shadow1['result'] == 0:
                 param['ctrl']['errormsg'] = 'No contact with backend'
-                return render_template('error.html', param=param)
+                return render_template('error', param=param)
             param['ctrl']['okmsg'] = 'Values has been updated'
             return render_template('user', param=param)
         else:
@@ -169,9 +173,7 @@ def eduser():
 @app.route('/newboard', methods=['GET', 'POST'])
 def newboard():
     param = {'data': [], 'ctrl': {}}
-    if 'username' in session.keys():
-        param['ctrl']['loggedin'] = 'yes'
-        param['ctrl']['sessionname'] = session['username']
+    update_session(param)
     if request.method == 'POST':
         username = request.form['username']
         boardname = request.form['boardname']
@@ -182,8 +184,8 @@ def newboard():
         if startdate == '':
             startdate = '1970-01-01T00:00'
         data = {'username':username, 'boardname':boardname, 'startdate':startdate, 'votenum':votenum}
-        res = restapi.addboard(data)
-        if res == 0:
+        shadow1 = restapi.addboard(data)
+        if shadow1['result'] == 0:
             param['ctrl']['errormsg'] = 'No contact with backend'
             return render_template('error', param=param)
         else:
@@ -195,28 +197,23 @@ def newboard():
 @app.route('/delboard/<boardid>')
 def delboard(boardid):
     param = {'data': [], 'ctrl': {}}
-    if 'username' in session.keys():
-        param['ctrl']['loggedin'] = 'yes'
-        param['ctrl']['sessionname'] = session['username']
-
-        # ret = restapi.get('http://localhost:5000/lct/api/v1.0/boards/'+boardid)
-        ret = restapi.getboard(param, boardid)
-        if ret == 0:
+    if update_session(param):
+        shadow1 = restapi.getboard(boardid)
+        if shadow1['result'] == 0:
             param['ctrl']['errormsg'] = 'No contact with backend'
             return render_template('error', param=param)
-        if not ret == 200:
+        if not shadow1['result'] == 200:
             param['ctrl']['errormsg'] = 'No such board'
             return render_template('error', param=param)
-        if not param['data'][0]['user'] == session['username']:
+        if not shadow1['data'][0]['user'] == session['username']:
             param['ctrl']['errormsg'] = 'Can not delete someone else\'s board'
             return render_template('error', param=param)
         else:
-            # ret = restapi.delete('http://localhost:5000/lct/api/v1.0/boards/' + boardid)
-            ret = restapi.delboard(boardid)
-            if ret == 0:
+            shadow2 = restapi.delboard(boardid)
+            if shadow2['result'] == 0:
                 param['ctrl']['errormsg'] = 'No contact with backend'
                 return render_template('error', param=param)
-            if not ret == 201:
+            if not shadow2['result'] == 201:
                 param['ctrl']['errormsg'] = 'No such board'
                 return render_template('error', param=param)
             else:
@@ -229,12 +226,37 @@ def delboard(boardid):
 @app.route('/board/<boardid>')
 def board(boardid):
     param = {'data': [], 'ctrl': {}}
-    #param['ctrl']['boardid'] = boardid
-    if 'username' in session.keys():
-        param['ctrl']['loggedin'] = 'yes'
-        param['ctrl']['sessionname'] = session['username']
-    res = restapi.gettopics(param, boardid)
-    if res == 0:
+    index = 0 # topic index in data
+    update_session(param)
+    myboardvotes = 0  # Total number of votes for me of the entire board
+
+    # We need some board data
+    shadow1 = restapi.getboard(boardid)
+    param['ctrl']['votenum'] = shadow1['data'][0]['votenum']
+    param['ctrl']['boardname'] = shadow1['data'][0]['name']
+    param['ctrl']['boardid'] = boardid
+
+    shadow1 = restapi.gettopics(boardid)
+    # ToDO: Check return
+    for topic in shadow1['data']:
+        topicvotes = 0  # Total number of votes for each topic
+        mytopicvotes = 0  # Total number of of votes for me for each topic
+        shadow2 = restapi.gettopic(boardid, topic)
+        # ToDO: Check return
+        param['data'].append(shadow2['data'][0])
+        shadow3 = restapi.getvotes(boardid, topic)
+        for voteid in shadow3['data']:
+            shadow4 = restapi.getvote(boardid, topic, voteid)
+            for vote in shadow4['data']:
+                topicvotes += 1
+                if vote['user'] == param['ctrl']['sessionname']:
+                    mytopicvotes += 1
+                    myboardvotes += 1
+        param['data'][index]['topicvotes'] = topicvotes
+        param['data'][index]['mytopicvotes'] = mytopicvotes
+        index += 1
+    param['ctrl']['myboardvotes'] = myboardvotes
+    if shadow1['result'] == 0:
         param['ctrl']['errormsg'] = 'No contact with backend'
         return render_template('error', param=param)
     return render_template('board', param=param)
@@ -242,52 +264,46 @@ def board(boardid):
 
 @app.route('/boards/<boardid>',methods=['GET','POST'])
 def newtopic(boardid):
+    # ToDo: figure out how boardid is treated?
     param = {'data': [], 'ctrl': {}}
-    # param['boardid'] = boardid
-    if 'username' in session.keys():
-        param['ctrl']['loggedin'] = 'yes'
-        param['ctrl']['sessionname'] = session['username']
-
+    update_session(param)
     if request.method == 'POST':
         topicheading = request.form['topicheading']
         topicdesc = request.form['topicdesc']
         boardid = request.form['boardid']
         data = {'heading':topicheading, 'description':topicdesc, 'username':session['username']}
-        ret = restapi.addtopic(param, boardid, data)
-        # if restapi.post('http://localhost:5000/lct/api/v1.0/boards/'+boardid+'/topics', data):
+        shadow1 = restapi.addtopic(boardid, data)
         # ToDo: branch on correct values
-        if ret not == 0:
+        if not shadow1['result'] == 0:
             return redirect(url_for('board', boardid=boardid))
         else:
             param['ctrl']['errormsg'] = 'No contact with backend'
-            return render_template('error.html', param=param)
+            return render_template('error', param=param)
     else:
-        return render_template('newtopic.html', param=param)
+        param['boardid'] = boardid
+        return render_template('newtopic', param=param)
 
 
 @app.route('/boards/<boardid>/deltopic/<topicid>', methods=['GET'])
 def deltopic(boardid, topicid):
     param = {'data': [], 'ctrl': {}}
-    if 'username' in session.keys():
-        param['ctrl']['loggedin'] = 'yes'
-        param['ctrl']['sessionname'] = session['username']
-
-        ret = restapi.get('http://localhost:5000/lct/api/v1.0/boards/'+boardid+'/topics/'+topicid)
-        if ret['response'] == 0:
+    if update_session(param):
+        shadow1 = restapi.gettopic(boardid, topicid)
+        if shadow1['result'] == 0:
             param['ctrl']['errormsg'] = 'No contact with backend'
             return render_template('error.html', param=param)
-        if not ret['response'] == 200:
+        if not shadow1['result'] == 200:
             param['ctrl']['errormsg'] = 'No such topic'
             return render_template('error.html', param=param)
-        if not ret['datalist'][0]['user'] == session['username']:
+        if not shadow1['data'][0]['user'] == session['username']:
             param['ctrl']['errormsg'] = 'Can not delete anyone else topic'
             return render_template('error.html', param=param)
         else:
-            ret = restapi.delete('http://localhost:5000/lct/api/v1.0/boards/'+boardid+'/topics/'+topicid)
-            if ret['response'] == 0:
+            shadow1 = restapi.deltopic(boardid, topicid)
+            if shadow1['result'] == 0:
                 param['ctrl']['errormsg'] = 'No contact with backend'
                 return render_template('error.html', param=param)
-            if not ret['response'] == 201:
+            if not shadow1['result'] == 201:
                 param['ctrl']['errormsg'] = 'No such board'
                 return render_template('error.html', param=param)
             else:
@@ -301,35 +317,30 @@ def deltopic(boardid, topicid):
 def newvote(boardid, topicid):
     if 'username' in session.keys():
         data = {'user': session['username'], 'topicid': topicid}
-        ret = restapi.post('http://localhost:5000/lct/api/v1.0/boards/'+boardid+'/topics/'+topicid+'/votes', data)
+        shadow1 = restapi.addvote(boardid, topicid, data)
     return redirect(url_for('board', boardid=boardid))
 
 
 @app.route('/boards/<boardid>/topics/<topicid>/votes/<voteid>', methods=['GET'])
 def delvote(boardid, topicid, voteid):
     if 'username' in session.keys():
-        ret = restapi.delvote(boardid, topicid, voteid, session['username'])
-        # ret = restapi.delete('http://localhost:5000/lct/api/v1.0/boards/'+boardid+'/topics/'+topicid+'/votes/'+voteid)
+        ret = restapi.delvote(boardid, topicid, session['username'])
     return redirect(url_for('board', boardid=boardid))
 
 
-@app.route('/about.html', methods=['GET'])
+@app.route('/about', methods=['GET'])
 def about():
     param = {}
     param['ctrl'] = {}
-    if 'username' in session.keys():
-        param['ctrl']['loggedin'] = 'yes'
-        param['ctrl']['sessionname'] = session['username']
-    return render_template('about.html', param=param)
+    update_session(param)
+    return render_template('about', param=param)
 
 
 @app.route('/setup.html', methods=['GET'])
 def setup():
     param = {}
     param['ctrl'] = {}
-    if 'username' in session.keys():
-        param['ctrl']['loggedin'] = 'yes'
-        param['ctrl']['sessionname'] = session['username']
+    update_session(param)
     param = restapi.getconfig(param)
     if param['ctrl']['response'] == 0:
         param['ctrl']['errormsg'] = 'No contact with backend'

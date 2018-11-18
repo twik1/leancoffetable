@@ -68,123 +68,291 @@ class CurlREST:
             response['response'] = 0
             return response
 
-    def getboards(self, param):
+    def getboards(self):
         """
         Get boards available for user
-        :param param:
-            A datastructure to fill in for the function
         :return:
-            The result of the REST http get request
-            ToDo: we can add more respons if something fail
+            A dictionary retlist with results
+            {'data':[<id1>, <id2>]
+             'result': <result of the HTTP request>
+            }
         """
+        retlist = {'data':[]}
         ids = self.get(self.baseurl+"boards")
-        param['ctrl']['response'] = ids['response']
+        retlist['result'] = ids['response']
         if 'datalist' in ids:
             for id in ids['datalist']:
-                board = self.get(self.baseurl+'boards/'+str(id['boardid']))
-                param['data'].append(board['datalist'][0])
-        return ids['response']
+                retlist['data'].append(str(id['boardid']))
+        return retlist
 
     def addboard(self, data):
+        """
+        Add a board
+        :param data:
+            a dictionary with board data
+        :return:
+            A dictionary retlist with results
+            {'result': <result of the HTTP request>}
+        """
+        retlist = {}
         res = self.post(self.baseurl + "boards", data)
-        return res['response']
+        retlist['result'] = res['response']
+        return retlist
 
-    def getboard(self, param, boardid):
+    def getboard(self, boardid):
+        """
+        Get data for a specific board id
+        :param boardid:
+        :return:
+            A dictionary retlist with results
+            {'data':[<board data>]
+             'result': <result of the HTTP request>
+            }
+        """
+        retlist = {'data': []}
         board = self.get(self.baseurl + 'boards/' + boardid)
+        retlist['result'] = board['response']
         if 'datalist' in board:
-            param['data'].append(board['datalist'][0])
-        return board['response']
+            retlist['data'].append(board['datalist'][0])
+        return retlist
 
     def delboard(self, boardid):
+        """
+        Delete a specific board id
+        :param boardid:
+        :return:
+        """
+        retlist = {}
         res = self.delete(self.baseurl + 'boards/' + boardid)
-        return res['response']
+        retlist['result'] = res['response']
+        return retlist
 
-    def getuser(self, param, user):
+    def getusers(self):
+        """
+        Get all userids
+        :return:
+            A dictionary retlist with results
+            {'data':[<usr1>, <usr2>]
+             'result': <result of the HTTP request>
+            }
+        """
+        retlist = {}
+        usrs = self.get(self.baseurl + "users")
+        retlist['result'] = usrs['response']
+        if 'datalist' in usrs:
+            for usr in usrs['datalist']:
+                retlist['data'].append(usr['user'])
+        return retlist
+
+    def getuser(self, user):
+        """
+        Get data for a specific userid
+        :param user:
+            A dictionary retlist with results
+            {'data':[<user data>]
+             'result': <result of the HTTP request>
+            }
+        """
+        retlist = {'data': []}
         usr = self.get(self.baseurl + "users/" + user)
-        param['ctrl']['response'] = usr['response']
+        retlist['result'] = usr['response']
         if 'datalist' in usr:
-            param['data'].append(usr['datalist'][0])
-        return usr['response']
+            retlist['data'].append(usr['datalist'][0])
+        return retlist
 
     def adduser(self, data):
+        """
+        Add a user
+        :param data:
+             A dictionary with user data
+        :return:
+            A dictionary retlist with results
+            {'result': <result of the HTTP request>}
+        """
+        retlist = {}
         res = self.post(self.baseurl + "users", data)
-        return res['response']
+        retlist['result'] = res['response']
+        return retlist
 
     def updateuser(self, data):
+        """
+        Update user data
+        :param data:
+             A dictionary with user data
+        :return:
+            A dictionary retlist with results
+            {'result': <result of the HTTP request>}
+        """
+        # ToDo att a check to see if the user exists
         return self.adduser(data)
 
     def checkuser(self, user):
+        """
+        Check to see if a user exists
+        :param user:
+            userid of the user to check for
+        :return:
+            True if the user exist
+            False if the user doesnt exist
+        """
         ids = self.get(self.baseurl + "users/" + user)
         if ids['response'] == 200:
             return True
         else:
             return False
 
-    # ToDo: Split this function up and have logic in web
-    def gettopics(self, param, boardid):
-        # datastore['data'] = []
-        index = 0
-        # board = self.get(self.baseurl + 'boards/' + boardid)
-        res = self.getboard(param, boardid)
-        # ToDO: Return on fail
-        param['ctrl']['votenum'] = param['data'][0]['votenum']
-        param['ctrl']['boardname'] = param['data'][0]['name']
-        param['ctrl']['boardid'] = boardid
-#        if 'datalist' in board:
-#            datastore['ctrl']['user'] = board['datalist'][0]['user']
-        param['data'] = [] # Clear data from getboard run
-        ids = self.get(self.baseurl+"boards/"+boardid+'/topics')
-        # ToDO: Return on fail
-        param['ctrl']['response'] = ids['response']
-        myboardvotes = 0  # Total number of votes for me of the entire board
+    def gettopics(self, boardid):
+        """
+        Get all topics for a boardid
+        :param boardid:
+            Boardid to check for topics
+        :return:
+            A dictionary with results
+            {'data':[<topicid1>, <topicid2>]
+             'result': <result of the HTTP request>
+            }
+        """
+        retlist = {'data':[]}
+        ids = self.get(self.baseurl + "boards/" + boardid + '/topics')
+        retlist['result'] = ids['response']
         if 'datalist' in ids:
-            for id in ids['datalist']:  # Loop through topics
-                topicvotes = 0  # Total number of votes for each topic
-                mytopicvotes = 0  # Total number of of votes for me for each topic
-                topic = self.get(self.baseurl+'boards/'+boardid+'/topics/'+str(id['topicid']))
-                # ToDO: Return on fail
-                param['data'].append(topic['datalist'][0])
-                # Handle votes
-                vids = self.get(self.baseurl+"boards/"+boardid+'/topics/'+str(id['topicid'])+'/votes')
-                # ToDO: Return on fail
-                if 'datalist' in vids:
-                    for ids in vids['datalist']:
-                        vote = self.get(self.baseurl+"boards/"+boardid+'/topics/'+str(id['topicid'])+'/votes/'+str(ids['voteid']))
-                        # ToDO: Return on fail
-                        #if 'datalist' in vote:
-                        if 'sessionname' in param['ctrl']:
-                            if param['ctrl']['sessionname'] == vote['datalist'][0]['user']:
-                                #datastore['data'][index]['thumbsup'] = str(ids['voteid'])
-                                mytopicvotes = mytopicvotes + 1
-                                myboardvotes = myboardvotes + 1
-                        topicvotes = topicvotes + 1
-                    param['data'][index]['topicvotes'] = topicvotes
-                param['data'][index]['mytopicvotes'] = mytopicvotes
-                index = index + 1
-        # Only sort on request
-        # sortedlist = self.sortlist(datastore['data'])
-        # datastore['data'] = sortedlist
-        param['ctrl']['myboardvotes'] = myboardvotes
-        return param['ctrl']['response']
+            for id in ids['datalist']:
+                retlist['data'].append(str(id['topicid']))
+        return retlist
 
-    def addtopic(self, param, boardid, data):
+    def gettopic(self, boardid, topicid):
+        """
+        Get data for a specific topic id
+        :param boardid:
+            Board id
+        :param topicid:
+            Topic id
+        :return:
+            A dictionary with results
+            {'data':[<topic data>]
+             'result': <result of the HTTP request>
+            }
+        """
+        retlist = {'data':[]}
+        topic = self.get(self.baseurl + 'boards/' + boardid + '/topics/' + topicid)
+        retlist['result'] = topic['response']
+        if 'datalist' in topic:
+            retlist['data'].append(topic['datalist'][0])
+        return retlist
+
+    def addtopic(self, boardid, data):
+        """
+        Add data for a topic
+        :param boardid:
+            Board id
+        :param data:
+            A dictionary with user data
+        :return:
+
+        """
+        retlist = {}
         res = self.post(self.baseurl + "boards/" + boardid + "/topics", data)
-        return res['response']
+        retlist['result'] = res['response']
+        return retlist
 
-    def getconfig(self, param):
-        ids = self.get(self.baseurl+"config")
-        param['ctrl']['response'] = ids['response']
-        if 'datalist' in ids:
-            param['data'] = ids['datalist']
-        return param
+    def deltopic(self, boardid, topicid):
+        """
+        Delete a topic
+        :param boardid:
+            Board id
+        :param topicid:
+            Topic id to delete
+        :return:
+            A dictionary with results
+            {'result': <result of the HTTP request>}
+        """
+        retlist = {}
+        res = self.delete(self.baseurl + "boards/" + boardid + "/topics/" + topicid)
+        retlist['result'] = res['response']
+        return retlist
 
-    def delvote(self, boardid, topicid, voteid, username):
-        if voteid == '0':
-            vids = self.get(self.baseurl + "boards/" + boardid + '/topics/' + topicid + '/votes')
-            if 'datalist' in vids:
-                for ids in vids['datalist']:
-                    vote = self.get(self.baseurl + "boards/" + boardid + '/topics/' + topicid + '/votes/' + str(ids['voteid']))
-                    if username == vote['datalist'][0]['user']:
-                        voteid = str(ids['voteid'])
-                        break
-        self.delete(self.baseurl + "boards/" + boardid + "/topics/" + topicid + "/votes/" + voteid)
+    def getvotes(self, boardid, topicid):
+        """
+        Get votes for a topic id
+        :param boardid:
+            Board id
+        :param topicid:
+            Topic id
+        :return:
+            A dictionary with results
+            {'data':[<voted1>, <voteid2>]
+             'result': <result of the HTTP request>
+            }
+        """
+        retlist = {'data':[]}
+        vids = self.get(self.baseurl + "boards/" + boardid + '/topics/' + topicid + '/votes')
+        retlist['result'] = vids['response']
+        if 'datalist' in vids:
+            for id in vids['datalist']:
+                retlist['data'].append(str(id['voteid']))
+        return retlist
+
+    def getvote(self, boardid, topicid, voteid):
+        """
+        Get data for a specific vote
+        :param boardid:
+            Board id
+        :param topicid:
+            Topic id
+        :param voteid:
+            Vote id
+        :return:
+            A dictionary retlist with results
+            {'data':[<vote data>]
+             'result': <result of the HTTP request>
+        """
+        retlist = {'data': []}
+        vote = self.get(self.baseurl + "boards/" + boardid + '/topics/' + topicid + '/votes/' + voteid)
+        retlist['result'] = vote['response']
+        if 'datalist' in vote:
+            retlist['data'].append(vote['datalist'][0])
+        return retlist
+
+    def addvote(self, boardid, topicid, data):
+        """
+        Add a vote to a topic
+        :param boardid:
+            Board id
+        :param topicid:
+            Topic Id
+        :param data:
+            Data about the vote
+        :return:
+            A dictionary with results
+            {'result': <result of the HTTP request>}
+        """
+        retlist = {}
+        res = self.post(self.baseurl + "boards/" + boardid + "/topics/" + topicid + "/votes", data)
+        retlist['result'] = res['response']
+        return retlist
+
+    def delvote(self, boardid, topicid, user):
+        """
+        Delete a vote from a topic
+        :param boardid:
+            Board id
+        :param topicid:
+             Topic id
+        :param user:
+            The user doing the delete
+        :return:
+            A dictionary with results
+            {'result': <result of the HTTP request>}
+        """
+        retlist = {}
+        shadow1 = self.getvotes(boardid, topicid)
+        for voteid in shadow1['data']:
+            shadow2 = self.getvote(boardid, topicid, voteid)
+            for vote in shadow2['data']:
+                if vote['user'] == user:
+                    res = self.delete(self.baseurl + "boards/" + boardid + "/topics/" + topicid + "/votes/" + voteid)
+                    retlist['result'] = res['response']
+                    return retlist
+        retlist['result'] = shadow1['response']
+        return retlist
+
