@@ -95,7 +95,7 @@
             {% if 'sessionname' in param['ctrl'] %}
                 <p class="navbar-text pull-left">{{ param['ctrl']['sessionname'] }} Logged in</p>
             {% else %}
-                <p class="navbar-text pull-left">No one logged in</p>
+                <p class="navbar-text pull-left">You are not logged in</p>
             {% endif %}
 
         </div>
