@@ -59,7 +59,11 @@
       </div>
     </nav>
 
-    <div class="container-fluid" id="addbutton">
+    <div class="container-fluid btn-toolbar" id="addbutton">
+        {% if param['data'] |count > 1 %}
+        <button type="button" class="btn btn-info pull-right" onclick="location.href='{{ url_for('board', boardid=param['ctrl']['boardid'], sort='yes') }}';">Sort topics</button>
+        {% endif %}
+
         {% if param['ctrl']['loggedin'] == 'yes' %}
         <button type="button" class="btn btn-success pull-right" onclick="location.href='{{ url_for('newtopic',boardid=param['ctrl']['boardid']) }}';">Add new topic</button>
         {% else %}
