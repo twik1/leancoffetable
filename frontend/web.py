@@ -44,6 +44,27 @@ def update_session(param):
         return True
     return False
 
+
+def sortlist(list):
+    if len(list) == 0:
+        #Nothing to sort
+        return list
+    newlist = []
+    i = 0
+    j = 0
+    lowest = list[0]['topicvotes']
+    while len(list) > 0:
+        for i in range(0, len(list)):
+            if list[i]['topicvotes'] <= lowest:
+                lowest = list[i]['topicvotes']
+                j = i
+        newlist.insert(0,list[j])
+        del list[j]
+        if len(list)>=1:
+            lowest = list[0]['topicvotes']
+            j = 0
+    return newlist
+
 @app.route('/index', methods=['GET'])
 @app.route('/', methods=['GET'])
 def index():
@@ -173,25 +194,28 @@ def eduser():
 @app.route('/newboard', methods=['GET', 'POST'])
 def newboard():
     param = {'data': [], 'ctrl': {}}
-    update_session(param)
-    if request.method == 'POST':
-        username = request.form['username']
-        boardname = request.form['boardname']
-        startdate = request.form['startdate']
-        votenum = request.form['votenum']
-        if votenum == 'Unlimited':
-            votenum = '0'
-        if startdate == '':
-            startdate = '1970-01-01T00:00'
-        data = {'username':username, 'boardname':boardname, 'startdate':startdate, 'votenum':votenum}
-        shadow1 = restapi.addboard(data)
-        if shadow1['result'] == 0:
-            param['ctrl']['errormsg'] = 'No contact with backend'
-            return render_template('error', param=param)
+    if update_session(param):
+        if request.method == 'POST':
+            username = request.form['username']
+            boardname = request.form['boardname']
+            startdate = request.form['startdate']
+            votenum = request.form['votenum']
+            if votenum == 'Unlimited':
+                votenum = '0'
+            if startdate == '':
+                startdate = '1970-01-01T00:00'
+            data = {'username':username, 'boardname':boardname, 'startdate':startdate, 'votenum':votenum}
+            shadow1 = restapi.addboard(data)
+            if shadow1['result'] == 0:
+                param['ctrl']['errormsg'] = 'No contact with backend'
+                return render_template('error', param=param)
+            else:
+                return redirect(url_for('index'))
         else:
-            return redirect(url_for('index'))
+            return render_template('newboard', param=param)
     else:
-        return render_template('newboard', param=param)
+        param['ctrl']['errormsg'] = 'You need to be logged in to create a board'
+        return render_template('error', param=param)
 
 
 @app.route('/delboard/<boardid>')
@@ -223,7 +247,7 @@ def delboard(boardid):
         return render_template('error', param=param)
 
 
-@app.route('/board/<boardid>')
+@app.route('/board/<boardid>', methods=['GET'])
 def board(boardid):
     param = {'data': [], 'ctrl': {}}
     index = 0 # topic index in data
@@ -249,9 +273,10 @@ def board(boardid):
             shadow4 = restapi.getvote(boardid, topic, voteid)
             for vote in shadow4['data']:
                 topicvotes += 1
-                if vote['user'] == param['ctrl']['sessionname']:
-                    mytopicvotes += 1
-                    myboardvotes += 1
+                if 'sessionname' in param['ctrl'].keys():
+                    if vote['user'] == param['ctrl']['sessionname']:
+                        mytopicvotes += 1
+                        myboardvotes += 1
         param['data'][index]['topicvotes'] = topicvotes
         param['data'][index]['mytopicvotes'] = mytopicvotes
         index += 1
@@ -259,6 +284,9 @@ def board(boardid):
     if shadow1['result'] == 0:
         param['ctrl']['errormsg'] = 'No contact with backend'
         return render_template('error', param=param)
+    if request.args.get('sort'):
+        tmplist = sortlist(param['data'])
+        param['data'] = tmplist
     return render_template('board', param=param)
 
 
@@ -266,22 +294,25 @@ def board(boardid):
 def newtopic(boardid):
     # ToDo: figure out how boardid is treated?
     param = {'data': [], 'ctrl': {}}
-    update_session(param)
-    if request.method == 'POST':
-        topicheading = request.form['topicheading']
-        topicdesc = request.form['topicdesc']
-        boardid = request.form['boardid']
-        data = {'heading':topicheading, 'description':topicdesc, 'username':session['username']}
-        shadow1 = restapi.addtopic(boardid, data)
-        # ToDo: branch on correct values
-        if not shadow1['result'] == 0:
-            return redirect(url_for('board', boardid=boardid))
+    if update_session(param):
+        if request.method == 'POST':
+            topicheading = request.form['topicheading']
+            topicdesc = request.form['topicdesc']
+            boardid = request.form['boardid']
+            data = {'heading':topicheading, 'description':topicdesc, 'username':session['username']}
+            shadow1 = restapi.addtopic(boardid, data)
+            # ToDo: branch on correct values
+            if not shadow1['result'] == 0:
+                return redirect(url_for('board', boardid=boardid))
+            else:
+                param['ctrl']['errormsg'] = 'No contact with backend'
+                return render_template('error', param=param)
         else:
-            param['ctrl']['errormsg'] = 'No contact with backend'
-            return render_template('error', param=param)
+            param['boardid'] = boardid
+            return render_template('newtopic', param=param)
     else:
-        param['boardid'] = boardid
-        return render_template('newtopic', param=param)
+        param['ctrl']['errormsg'] = 'You need to be logged in to create a topic'
+        return render_template('error', param=param)
 
 
 @app.route('/boards/<boardid>/deltopic/<topicid>', methods=['GET'])
@@ -310,7 +341,7 @@ def deltopic(boardid, topicid):
                 return redirect(url_for('board', boardid=boardid))
     else:
         param['ctrl']['errormsg'] = 'You need to be logged in to delete a topic'
-        return render_template('error.html', param=param)
+        return render_template('error', param=param)
 
 
 @app.route('/boards/<boardid>/topics/<topicid>/votes', methods=['GET'])

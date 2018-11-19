@@ -7,27 +7,6 @@ class CurlREST:
         self.headers = {'Content-Type': 'application/json'}
         self.baseurl = 'http://localhost:5000/lct/api/v1.0/'
 
-    def sortlist(self, list):
-        if len(list) == 0:
-            # Nothing to sort
-            return list
-        newlist = []
-        i = 0
-        j = 0
-        lowest = list[0]['numvote']
-        while len(list) > 0:
-            for i in range(0, len(list)):
-                if list[i]['numvote'] <= lowest:
-                    lowest = list[i]['numvote']
-                    j = i
-            newlist.insert(0,list[j])
-            del list[j]
-            if len(list)>=1:
-                lowest = list[0]['numvote']
-                j = 0
-        return newlist
-
-
     def get(self, url):
         """
         Executes REST API call to specific url
