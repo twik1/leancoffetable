@@ -92,7 +92,7 @@ def login():
         shadow1 = restapi.getuser(request.form['user'])
         if shadow1['result'] == 0:
             param['ctrl']['errormsg'] = 'No contact with backend'
-            return render_template('error.html', param=param)
+            return render_template('error', param=param)
         if not shadow1['result'] == 200:
             param['ctrl']['errormsg'] = 'Faulty user or password'
             return render_template('login', param=param)
@@ -322,21 +322,21 @@ def deltopic(boardid, topicid):
         shadow1 = restapi.gettopic(boardid, topicid)
         if shadow1['result'] == 0:
             param['ctrl']['errormsg'] = 'No contact with backend'
-            return render_template('error.html', param=param)
+            return render_template('error', param=param)
         if not shadow1['result'] == 200:
             param['ctrl']['errormsg'] = 'No such topic'
-            return render_template('error.html', param=param)
+            return render_template('error', param=param)
         if not shadow1['data'][0]['user'] == session['username']:
             param['ctrl']['errormsg'] = 'Can not delete anyone else topic'
-            return render_template('error.html', param=param)
+            return render_template('error', param=param)
         else:
             shadow1 = restapi.deltopic(boardid, topicid)
             if shadow1['result'] == 0:
                 param['ctrl']['errormsg'] = 'No contact with backend'
-                return render_template('error.html', param=param)
+                return render_template('error', param=param)
             if not shadow1['result'] == 201:
                 param['ctrl']['errormsg'] = 'No such board'
-                return render_template('error.html', param=param)
+                return render_template('error', param=param)
             else:
                 return redirect(url_for('board', boardid=boardid))
     else:
@@ -367,16 +367,41 @@ def about():
     return render_template('about', param=param)
 
 
-@app.route('/setup.html', methods=['GET'])
+@app.route('/setup', methods=['GET', 'POST'])
 def setup():
+    global gcfg
+    global gqueue
     param = {}
     param['ctrl'] = {}
     update_session(param)
-    param = restapi.getconfig(param)
-    if param['ctrl']['response'] == 0:
-        param['ctrl']['errormsg'] = 'No contact with backend'
-        return render_template('error.html', param=param)
-    return render_template('setup.html', param=param)
+
+    if request.method == 'POST':
+        # Get all fields and store in cfg and write
+        gcfg.set_cfg('frontend', 'backend_host', request.form['backend_host'])
+        gcfg.set_cfg('frontend', 'backend_port', request.form['backend_port'])
+        restapi.setbaseurl(gcfg.get_cfg('frontend', 'backend_host'), gcfg.get_cfg('frontend', 'backend_port'))
+        # If listen address change restart
+        listen_address = gcfg.get_cfg('frontend', 'listen_address')
+        listen_port = gcfg.get_cfg('frontend', 'listen_port')
+        if not listen_address == request.form['listen_address'] or not listen_port == request.form['listen_port']:
+            gcfg.set_cfg('frontend', 'listen_address', request.form['listen_address'])
+            gcfg.set_cfg('frontend', 'listen_port', request.form['listen_port'])
+            gqueue.put('restart')
+        return redirect(url_for('setup'))
+    else:
+        # Check backend status
+        shadow1 = restapi.getboards()
+        if shadow1['result'] == 200:
+            param['ctrl']['backend_status'] = 'ok'
+        else:
+            param['ctrl']['backend_status'] = 'fail'
+
+        param['ctrl']['listen_address'] = gcfg.get_cfg('frontend', 'listen_address')
+        param['ctrl']['listen_port'] = gcfg.get_cfg('frontend', 'listen_port')
+        param['ctrl']['backend_host'] = gcfg.get_cfg('frontend', 'backend_host')
+        param['ctrl']['backend_port'] = gcfg.get_cfg('frontend', 'backend_port')
+
+        return render_template('setup', param=param)
 
 
 def start_frontend(queue, argd):
@@ -387,11 +412,23 @@ def start_frontend(queue, argd):
     gcfg = config.Config('.lct', 'lctfrontend')
 
     # Frontend listen address and port is taken from start argument
+    # If it's not given check config file otherwise use default
     # The rest could be configured through web interface
-    gcfg.set_cfg('frontend', 'listen_address', argd['addr'])
-    gcfg.set_cfg('frontend', 'listen_port', argd['port'])
-    gcfg.set_cfg('frontend', 'backend_host', '0.0.0.0')
-    gcfg.set_cfg('frontend', 'backend_port', '5000')
+    if 'addr' in argd.keys():
+        gcfg.set_cfg('frontend', 'listen_address', argd['addr'])
+    elif not gcfg.get_cfg('frontend', 'listen_address'):
+        gcfg.set_cfg('frontend', 'listen_address', "0.0.0.0")
+    if 'port' in argd.keys():
+        gcfg.set_cfg('frontend', 'listen_port', argd['port'])
+    elif not gcfg.get_cfg('frontend', 'listen_address'):
+        gcfg.set_cfg('frontend', 'listen_port', '5050')
+    if not gcfg.get_cfg('frontend', 'backend_host'):
+        gcfg.set_cfg('frontend', 'backend_host', '0.0.0.0')
+    backend_host = gcfg.get_cfg('frontend', 'backend_host')
+    if not gcfg.get_cfg('frontend', 'backend_port'):
+        gcfg.set_cfg('frontend', 'backend_port', '5000')
+    backend_port = gcfg.get_cfg('frontend', 'backend_port')
+    restapi.setbaseurl(backend_host, backend_port)
 
     app.secret_key = 'super secret key'
     app.config['SESSION_TYPE'] = 'filesystem'
@@ -407,13 +444,9 @@ if __name__ == '__main__':
     parser.add_argument('-p', '--listen_port', help='Frontend listen port', required=False)
     args = parser.parse_args()
 
-    if not args.listen_address:
-        frontend_parameter['addr'] = '0.0.0.0'
-    else:
+    if args.listen_address:
         frontend_parameter['addr'] = args.listen_address
-    if not args.listen_port:
-        frontend_parameter['port'] = '5050'
-    else:
+    if args.listen_port:
         frontend_parameter['port'] = args.listen_port
 
     daemon = Daemon(start_frontend)

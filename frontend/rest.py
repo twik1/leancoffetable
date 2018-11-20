@@ -5,7 +5,7 @@ import json
 class CurlREST:
     def __init__(self):
         self.headers = {'Content-Type': 'application/json'}
-        self.baseurl = 'http://localhost:5000/lct/api/v1.0/'
+        # self.baseurl = 'http://localhost:5000/lct/api/v1.0/'
 
     def get(self, url):
         """
@@ -18,7 +18,7 @@ class CurlREST:
         """
         response = {}
         try:
-            ret = requests.get(url, headers=self.headers)
+            ret = requests.get(url, headers=self.headers, timeout=3)
             response['response'] = ret.status_code
             if ret.status_code == 200:
                 response['datalist'] = ret.json()
@@ -46,6 +46,9 @@ class CurlREST:
         except requests.exceptions.RequestException as e:
             response['response'] = 0
             return response
+
+    def setbaseurl(self, address, port):
+        self.baseurl = 'http://' + address + ':' + port + '/lct/api/v1.0/'
 
     def getboards(self):
         """
