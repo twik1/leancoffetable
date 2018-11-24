@@ -22,6 +22,11 @@ class DBMySQL:
         self.pwd = pwd
         self.datbase = db
 
+    def set_param(self, ip, usr, pwd, db):
+        self.ip = ip
+        self.usr = usr
+        self.pwd = pwd
+        self.datbase = db
 
     def conn(self):
         """ Connect to the MySQL database
@@ -100,11 +105,12 @@ class DBMySQL:
         res = self.conn()
         if not res == 0:
             return res
-        sql = "SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = 'DBName'"
-        restup = ()
+        sql = "SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = \'{}\' ".format(self.datbase)
         restup = self.db_get(sql)
-        if not len(restup):
+        self.disconn()
+        if restup is None:
             return 3 # No database
+        return res
 
 
 ##############################################################

@@ -338,3 +338,39 @@ class CurlREST:
         retlist['result'] = shadow1['response']
         return retlist
 
+    def getconfig(self):
+        """
+        Get backend configuration data
+        :return:
+            A dictionary with backend configuration
+            {'data':[<config data data>]
+             'result': <result of the HTTP request>
+        """
+        retlist = {'data': []}
+        cfg = self.get(self.baseurl + "config")
+        retlist['result'] = cfg['response']
+        if 'datalist' in cfg:
+            retlist['data'].append(cfg['datalist'])
+        return retlist
+
+    def setconfig(self, data):
+        retlist = {}
+        res = self.post(self.baseurl + "config", data)
+        retlist['result'] = res['response']
+        return retlist
+
+    def getdbstatus(self):
+        retlist = {'data': []}
+        cfg = self.get(self.baseurl + "db")
+        retlist['result'] = cfg['response']
+        if 'datalist' in cfg:
+            retlist['data'].append(cfg['datalist'])
+        return retlist
+
+    def getbackendstatus(self):
+        retlist = {'data': []}
+        cfg = self.get(self.baseurl + "backend")
+        retlist['result'] = cfg['response']
+        if 'datalist' in cfg:
+            retlist['data'].append(cfg['datalist'])
+        return retlist

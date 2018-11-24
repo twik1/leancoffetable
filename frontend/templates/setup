@@ -78,19 +78,19 @@
                 <tbody>
                     <tr>
                         <td>Frontend listen address</td>
-                        <td><input type="text" name="listen_address" class="form-control" value="{{ param['ctrl']['listen_address'] }}" id="listen_address" required>
+                        <td><input type="text" name="listen_address" class="form-control" value="{{ param['ctrl']['listen_address'] }}" id="listen_address" required></td>
                     </tr>
                     <tr>
                         <td>Frontend listen port</td>
-                        <td><input type="text" name="listen_port" class="form-control" value="{{ param['ctrl']['listen_port'] }}" id="listen_port" required>
+                        <td><input type="text" name="listen_port" class="form-control" value="{{ param['ctrl']['listen_port'] }}" id="listen_port" required></td>
                     </tr>
                     <tr>
                         <td>Backend address</td>
-                        <td><input type="text" name="backend_host" class="form-control" value="{{ param['ctrl']['backend_host'] }}" id="backend_host" required>
+                        <td><input type="text" name="backend_host" class="form-control" value="{{ param['ctrl']['backend_host'] }}" id="backend_host" required></td>
                     </tr>
                     <tr>
                         <td>Backend port</td>
-                        <td><input type="text" name="backend_port" class="form-control" value="{{ param['ctrl']['backend_port'] }}" id="backend_port" required>
+                        <td><input type="text" name="backend_port" class="form-control" value="{{ param['ctrl']['backend_port'] }}" id="backend_port" required></td>
                     </tr>
                 </tbody>
             </table>
@@ -98,7 +98,7 @@
                 <button type="submit" class="btn btn-success"><i class="fas fa-sign-in"></i> Save</button>
             </div>
         </form>
-
+        <br>
         {% if param['ctrl']['backend_status'] == 'fail' %}
             <div class="alert alert-danger">
                 <strong><i class="fas fa-times fa-lg"></i> </strong>No contact with backend
@@ -109,7 +109,7 @@
                 <strong><i class="fas fa-check fa-lg"></i> </strong>Backend reachable
             </div>
         {% endif %}
-
+        <hr>
         <div class="row">
             <div class="col-md-5"></div>
             <div class="col-md-3">
@@ -119,7 +119,8 @@
             <div class="col-md-4"></div>
         </div>
 
-        <form class="form-horizontal" role="form" method="POST" action="/setup">
+        {% if param['data'] %}
+        <form class="form-horizontal" role="form" method="POST" action="/backendsetup">
             <table class="table table-striped">
                 <thead>
                     <tr>
@@ -128,29 +129,34 @@
                     </tr>
                 </thead>
                 <tbody>
+                    {% for key, item in param['data'].items() %}
+                    <tr>
+                        <td> {{ key }} </td>
+                        {% for key, value in item.items() %}
+                        <td><input type="text" name="{{ key }}" class="form-control" value="{{ value }}" id="{{ key }}" required></td>
+                        {% endfor %}
+                    </tr>
+                    {% endfor %}
                 </tbody>
             </table>
             <div class="row" style="padding-top: 1rem">
                 <button type="submit" class="btn btn-success"><i class="fas fa-sign-in"></i> Save</button>
             </div>
         </form>
-
-    </div>
-    
-    <div class="container-fluid">
         <br>
-        {% if 'errormsg' in param['ctrl'] %}
+        {% if param['ctrl']['db_status'] == 'fail' %}
             <div class="alert alert-danger">
-                <strong><i class="fa fa-close fa-lg"></i> </strong>{{ param['ctrl']['errormsg'] }}
+                <strong><i class="fas fa-times fa-lg"></i> </strong>Unable to reach database
             </div>
         {% endif %}
-        {% if 'okmsg' in param['ctrl'] %}
+        {% if param['ctrl']['db_status'] == 'ok' %}
             <div class="alert alert-success">
-                <strong><i class="fa fa-check fa-lg"></i> </strong>{{ param['ctrl']['okmsg'] }}
+                <strong><i class="fas fa-check fa-lg"></i> </strong>Database reachable
             </div>
+        {% endif %}
         {% endif %}
     </div>
-
+    <br>
     <div class="navbar navbar-default navbar-fixed-bottom">
         <div class="container">
             {% if 'sessionname' in param['ctrl'] %}

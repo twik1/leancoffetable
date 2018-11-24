@@ -361,8 +361,7 @@ def delvote(boardid, topicid, voteid):
 
 @app.route('/about', methods=['GET'])
 def about():
-    param = {}
-    param['ctrl'] = {}
+    param = {'data': [], 'ctrl': {}}
     update_session(param)
     return render_template('about', param=param)
 
@@ -371,10 +370,8 @@ def about():
 def setup():
     global gcfg
     global gqueue
-    param = {}
-    param['ctrl'] = {}
+    param = {'data': [], 'ctrl': {}}
     update_session(param)
-
     if request.method == 'POST':
         # Get all fields and store in cfg and write
         gcfg.set_cfg('frontend', 'backend_host', request.form['backend_host'])
@@ -390,7 +387,8 @@ def setup():
         return redirect(url_for('setup'))
     else:
         # Check backend status
-        shadow1 = restapi.getboards()
+        # ToDo change to only test backend
+        shadow1 = restapi.getdbstatus()
         if shadow1['result'] == 200:
             param['ctrl']['backend_status'] = 'ok'
         else:
@@ -401,7 +399,28 @@ def setup():
         param['ctrl']['backend_host'] = gcfg.get_cfg('frontend', 'backend_host')
         param['ctrl']['backend_port'] = gcfg.get_cfg('frontend', 'backend_port')
 
+        shadow1 = restapi.getconfig()
+        if shadow1['result'] == 200:
+            param['data'] = shadow1['data'][0]
+        shadow1 = restapi.getdbstatus()
+        if shadow1['result'] == 200:
+            if shadow1['data'][0]['db_result'] == '0':
+                param['ctrl']['db_status'] = 'ok'
+            else:
+                param['ctrl']['db_status'] = 'fail'
         return render_template('setup', param=param)
+
+@app.route('/backendsetup', methods=['POST'])
+def backsetup():
+    global gcfg
+    param = {'data': [], 'ctrl': {}}
+    data = {}
+    update_session(param)
+    if request.method == 'POST':
+        for field, value in request.form.items():
+            data[field] = value
+        restapi.setconfig(data)
+    return redirect(url_for('setup'))
 
 
 def start_frontend(queue, argd):
