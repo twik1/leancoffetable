@@ -1,6 +1,7 @@
-body {
-    margin-top: 60px;
+@media screen and (max-width: 768px) {
+    body { padding-top: 0px; }
 }
+
 html {
     margin-bottom: 65px
 }

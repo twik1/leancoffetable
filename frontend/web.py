@@ -89,6 +89,15 @@ def login():
     param = {'data': [], 'ctrl': {}}
     update_session(param)
     if request.method == 'POST':
+        # Special treatment if user equal admin
+        if request.form['user'] == 'admin':
+            if request.form['password'] == gcfg.get_cfg('frontend', 'admin_password'):
+                session['username'] = request.form['user']
+                param['ctrl']['loggedin'] = 'yes'
+                return redirect(url_for('index'))
+            else:
+                param['ctrl']['errormsg'] = 'Faulty user or password'
+                return render_template('login', param=param)
         shadow1 = restapi.getuser(request.form['user'])
         if shadow1['result'] == 0:
             param['ctrl']['errormsg'] = 'No contact with backend'
@@ -125,7 +134,7 @@ def newuser():
         name = request.form['name']
         mail = request.form['email']
         password = pbkdf2_sha256.encrypt(request.form['password'], rounds=200000, salt_size=16)
-        if restapi.checkuser(user):
+        if restapi.checkuser(user) or user == 'admin':
             param['ctrl']['errormsg'] = 'User already exist'
             return render_template('newuser', param=param)
         data = {'user': user, 'name': name, 'password': password, 'mail': mail}
@@ -145,50 +154,72 @@ def newuser():
 @app.route('/eduser', methods=['GET', 'POST'])
 def eduser():
     param = {'data': [], 'ctrl': {}}
-    if 'username' not in session.keys():
+    if not update_session(param):
         param['ctrl']['errormsg'] = 'You are not logged in'
         return render_template('error', param=param)
-    param['ctrl']['loggedin'] = 'yes'
-    param['ctrl']['sessionname'] = session['username']
-    if request.method == 'GET':
-        shadow1 = restapi.getuser(session['username'])
-        if shadow1['result'] == 0:
-            param['ctrl']['errormsg'] = 'No contact with backend'
-            return render_template('error', param=param)
-        param['ctrl']['name'] = shadow1['data'][0]['name']
-        param['ctrl']['email'] = shadow1['data'][0]['mail']
-        return render_template('user', param=param)
-    else:
-        name = request.form['name']
-        mail = request.form['email']
-        newpassword = request.form['newpassword']
-        newpassword2 = request.form['newpassword2']
-        shadow1 = restapi.getuser(session['username'])
-        if shadow1['result'] == 0:
-            param['ctrl']['errormsg'] = 'No contact with backend'
-            return render_template('error', param=param)
-        param['ctrl']['sessionname'] = session['username']
-        param['ctrl']['name'] = name
-        param['ctrl']['email'] = mail
-        if pbkdf2_sha256.verify(request.form['password'], shadow1['data'][0]['password']):
-            if len(newpassword) or len(newpassword2):
-                if not newpassword == newpassword2:
-                    param['ctrl']['errormsg'] = 'New Password and Repeat New Password doesnt match'
-                    return render_template('user', param=param)
-                password = pbkdf2_sha256.encrypt(newpassword, rounds=200000, salt_size=16)
+
+    # Special treatment for admin
+    if session['username'] == 'admin':
+        if request.method == 'GET':
+            param['ctrl']['name'] = 'Not used'
+            param['ctrl']['email'] = 'not_used@notused.org'
+            return render_template('user', param=param)
+        else:
+            param['ctrl']['name'] = 'Not used'
+            param['ctrl']['email'] = 'not_used@notused.org'
+            if request.form['password'] == gcfg.get_cfg('frontend', 'admin_password'):
+                newpassword = request.form['newpassword']
+                newpassword2 = request.form['newpassword2']
+                if len(newpassword) or len(newpassword2):
+                    if not newpassword == newpassword2:
+                        param['ctrl']['errormsg'] = 'New Password and Repeat New Password doesnt match'
+                        return render_template('user', param=param)
+                    gcfg.set_cfg('frontend', 'admin_password', newpassword)
+                param['ctrl']['okmsg'] = 'Values has been updated'
+                return render_template('user', param=param)
             else:
-                password = shadow1['data'][0]['password']
-            user = session['username']
-            data = {'user': user, 'name': name, 'password': password, 'mail': mail}
-            shadow1 = restapi.updateuser(data)
+                param['ctrl']['errormsg'] = 'Faulty password'
+                return render_template('user', param=param)
+    else:
+        if request.method == 'GET':
+            shadow1 = restapi.getuser(session['username'])
             if shadow1['result'] == 0:
                 param['ctrl']['errormsg'] = 'No contact with backend'
                 return render_template('error', param=param)
-            param['ctrl']['okmsg'] = 'Values has been updated'
+            param['ctrl']['name'] = shadow1['data'][0]['name']
+            param['ctrl']['email'] = shadow1['data'][0]['mail']
             return render_template('user', param=param)
         else:
-            param['ctrl']['errormsg'] = 'Faulty password'
-            return render_template('user', param=param)
+            name = request.form['name']
+            mail = request.form['email']
+            newpassword = request.form['newpassword']
+            newpassword2 = request.form['newpassword2']
+            shadow1 = restapi.getuser(session['username'])
+            if shadow1['result'] == 0:
+                param['ctrl']['errormsg'] = 'No contact with backend'
+                return render_template('error', param=param)
+            param['ctrl']['sessionname'] = session['username']
+            param['ctrl']['name'] = name
+            param['ctrl']['email'] = mail
+            if pbkdf2_sha256.verify(request.form['password'], shadow1['data'][0]['password']):
+                if len(newpassword) or len(newpassword2):
+                    if not newpassword == newpassword2:
+                        param['ctrl']['errormsg'] = 'New Password and Repeat New Password doesnt match'
+                        return render_template('user', param=param)
+                    password = pbkdf2_sha256.encrypt(newpassword, rounds=200000, salt_size=16)
+                else:
+                    password = shadow1['data'][0]['password']
+                user = session['username']
+                data = {'user': user, 'name': name, 'password': password, 'mail': mail}
+                shadow1 = restapi.updateuser(data)
+                if shadow1['result'] == 0:
+                    param['ctrl']['errormsg'] = 'No contact with backend'
+                    return render_template('error', param=param)
+                param['ctrl']['okmsg'] = 'Values has been updated'
+                return render_template('user', param=param)
+            else:
+                param['ctrl']['errormsg'] = 'Faulty password'
+                return render_template('user', param=param)
 
 
 @app.route('/newboard', methods=['GET', 'POST'])
@@ -446,6 +477,8 @@ def start_frontend(queue, argd):
     backend_host = gcfg.get_cfg('frontend', 'backend_host')
     if not gcfg.get_cfg('frontend', 'backend_port'):
         gcfg.set_cfg('frontend', 'backend_port', '5000')
+    if not gcfg.get_cfg('frontend', 'admin_password'):
+       gcfg.set_cfg('frontend', 'admin_password', 'admin')
     backend_port = gcfg.get_cfg('frontend', 'backend_port')
     restapi.setbaseurl(backend_host, backend_port)
 
