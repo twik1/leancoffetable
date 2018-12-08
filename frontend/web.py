@@ -405,6 +405,9 @@ def setup():
     global gqueue
     param = {'data': [], 'ctrl': {}}
     update_session(param)
+    if not 'admin' in param['ctrl']:
+        param['ctrl']['errormsg'] = 'You need to be admin use setup'
+        return render_template('error', param=param)
     if request.method == 'POST':
         # Get all fields and store in cfg and write
         gcfg.set_cfg('frontend', 'backend_host', request.form['backend_host'])
