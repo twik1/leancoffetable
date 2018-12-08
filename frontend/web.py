@@ -41,6 +41,8 @@ def update_session(param):
     if 'username' in session.keys():
         param['ctrl']['loggedin'] = 'yes'
         param['ctrl']['sessionname'] = session['username']
+        if session['username'] == 'admin':
+            param['ctrl']['admin'] = 'yes'
         return True
     return False
 
@@ -260,7 +262,7 @@ def delboard(boardid):
         if not shadow1['result'] == 200:
             param['ctrl']['errormsg'] = 'No such board'
             return render_template('error', param=param)
-        if not shadow1['data'][0]['user'] == session['username']:
+        if (not shadow1['data'][0]['user'] == session['username']) and (not 'admin' in param['ctrl']):
             param['ctrl']['errormsg'] = 'Can not delete someone else\'s board'
             return render_template('error', param=param)
         else:
@@ -357,7 +359,7 @@ def deltopic(boardid, topicid):
         if not shadow1['result'] == 200:
             param['ctrl']['errormsg'] = 'No such topic'
             return render_template('error', param=param)
-        if not shadow1['data'][0]['user'] == session['username']:
+        if (not shadow1['data'][0]['user'] == session['username']) and (not 'admin' in param['ctrl']):
             param['ctrl']['errormsg'] = 'Can not delete anyone else topic'
             return render_template('error', param=param)
         else:

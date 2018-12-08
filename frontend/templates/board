@@ -94,7 +94,7 @@
                                     <tr>
                                         {% if 'sessionname' in param['ctrl'] %}
                                             <td style="width: 5%;">
-                                                {% if param['ctrl']['sessionname'] == topic['user'] %}
+                                                {% if param['ctrl']['sessionname'] == topic['user'] or 'admin' in param['ctrl'] %}
                                                     <a href="#" class="btn confirmdel tooltips pull-left" data-id="{{ url_for('deltopic', boardid=topic['boardid'],topicid=topic['topicid']) }}" title="Delete">
                                                         <span class="fas fa-trash-alt"></span>
                                                     </a>
