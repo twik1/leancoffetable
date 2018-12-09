@@ -10,6 +10,8 @@ import subprocess
 import time
 import sys
 
+CONST_LCTVER = '0.9.0'
+
 app = Flask(__name__)
 
 sess = Session()
@@ -396,6 +398,7 @@ def delvote(boardid, topicid, voteid):
 def about():
     param = {'data': [], 'ctrl': {}}
     update_session(param)
+    param['ctrl']['ver'] = CONST_LCTVER
     return render_template('about', param=param)
 
 
