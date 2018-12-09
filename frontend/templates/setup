@@ -42,6 +42,9 @@
             {% else %}
             <li><a href="{{ url_for('login') }}">Login</a></li>
             {% endif %}
+            {% if 'admin' in param['ctrl'] %}
+            <li><a href="{{ url_for('setup') }}">Setup</a></li>
+            {% endif %}
             <li><a href="{{ url_for('about') }}">About</a></li>
           </ul>
         </div>
