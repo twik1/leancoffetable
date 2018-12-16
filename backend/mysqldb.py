@@ -116,13 +116,13 @@ class DBMySQL:
 ##############################################################
 
 
-#    def get_users(self):
-#        userlist = []
-#        sql = "SELECT * FROM user"
-#        usertup = self.db_get(sql)
-#        for user in usertup:
-#            userlist.append({'user': user[0]})
-#        return userlist
+    def get_users(self):
+        userlist = []
+        sql = "SELECT * FROM user"
+        usertup = self.db_get(sql)
+        for user in usertup:
+            userlist.append({'user': user[0]})
+        return userlist
 
 
     def get_user(self, user):

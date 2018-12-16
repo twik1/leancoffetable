@@ -118,7 +118,7 @@ class CurlREST:
              'result': <result of the HTTP request>
             }
         """
-        retlist = {}
+        retlist = {'data': []}
         usrs = self.get(self.baseurl + "users")
         retlist['result'] = usrs['response']
         if 'datalist' in usrs:
@@ -153,6 +153,12 @@ class CurlREST:
         """
         retlist = {}
         res = self.post(self.baseurl + "users", data)
+        retlist['result'] = res['response']
+        return retlist
+
+    def deluser(self, user):
+        retlist = {}
+        res = self.delete(self.baseurl + "users/" + user)
         retlist['result'] = res['response']
         return retlist
 

@@ -1,6 +1,7 @@
+
 <!DOCTYPE html>
 <html lang="en">
-
+ 
 <head>
     <title>Lean Coffee Table</title>
     <meta charset="utf-8">
@@ -16,8 +17,9 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
     <script src="http://rawgithub.com/makeusabrew/bootbox/master/bootbox.js"></script>
 </head>
-
+      
 <body>
+
     <nav class="navbar navbar-inverse navbar-static-top">
       <div class="container-fluid">
         <div class="navbar-header">
@@ -29,6 +31,7 @@
           </button>
           <a class="navbar-brand" href="#">Lean Coffee Table</a>
         </div>
+
 
         <div class="collapse navbar-collapse" id="navbar-collapse-3">
           <ul class="nav navbar-nav navbar-right">
@@ -46,65 +49,93 @@
             <li><a href="{{ url_for('about') }}">About</a></li>
           </ul>
         </div>
-
       </div>
     </nav>
 
+
     <div class="container-fluid">
-        <form class="form-horizontal" role="form" method="POST" action="newtopic">
-            <div class="row">
-                <div class="col-md-5"></div>
-                <div class="col-md-3">
-                    <h2>Add new topic</h2>
-                    <br>
-                </div>
-                <div class="col-md-4"></div>
+        <div class="row">
+            <div class="col-md-5"></div>
+            <div class="col-md-3">
+                <h2>Setup</h2>
+                <br>
             </div>
+            <div class="col-md-4"></div>
+        </div>
 
-            <div class="row">
-                <div class="form-group has-danger">
-                    <div class="col-md-3"></div>
-                    <label class="control-lable col-md-1" for="topicheading">Topic heading</label>
-                    <div class="input-group col-md-3">
-                        <div class="input-group-addon" style="width: 2.6rem"><i class="fas fa-comment"></i></div>
-                        <input type="text" class="form-control" name="topicheading" id="topicheading" placeholder="Topic heading">
-                    </div>
-                </div>
+        <div class="row">
+            <div class="col-md-5"></div>
+            <div class="col-md-3">
+                <h4>User Management</h4>
+                <br>
             </div>
-
-            <div class="row">
-                <div class="form-group has-danger">
-                    <div class="col-md-3"></div>
-                    <label class="control-lable col-md-1" for="topicdesc">Topic description</label>
-                    <div class="input-group col-md-3">
-                        <div class="input-group-addon" style="width: 2.6rem"><i class="fas fa-comment"></i></div>
-                        <textarea type="text" class="form-control" name="topicdesc" id="topicdesc" placeholder="Topic description" rows="4"></textarea>
-                    </div>
-                </div>
-            </div>
-
-            <input type="hidden" name="boardid" value="{{ param['boardid'] }}" />
-
+            <div class="col-md-4"></div>
+        </div>
+        <form class="form-horizontal" id="usersform" role="form" method="POST" action="/users">
+            <table class="table table-striped table-condensed">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Select</th>
+                        <th>Userid</th>
+                        <th>Name</th>
+                        <th>E-mail</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in param['data'] %}
+                    <tr>
+                        <td>{{ user['index'] }}</td>
+                        <td>
+                            <input type="checkbox" class="form-check-input" name={{ user['user'] }} id={{ user['user'] }}>
+                        </td>
+                        <td>{{ user['user'] }}</td>
+                        <td>{{ user['name'] }}</td>
+                        <td>{{ user['mail'] }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
             <div class="row" style="padding-top: 1rem">
-                <div class="col-md-4"></div>
-                <div class="col-md-6">
-                    <button type="submit" class="btn btn-success"><i class="fas fa-sign-in"></i> Submit</button>
-                </div>
+                <button type="submit" class="btn btn-success confirmdel"><i class="fas fa-sign-in"></i> Delete</button>
             </div>
         </form>
+        <br>
+        {% if param['ctrl']['backend_status'] == 'fail' %}
+            <div class="alert alert-danger">
+                <strong><i class="fas fa-times fa-lg"></i> </strong>No contact with backend
+            </div>
+        {% endif %}
+        {% if param['ctrl']['backend_status'] == 'ok' %}
+            <div class="alert alert-success">
+                <strong><i class="fas fa-check fa-lg"></i> </strong>Backend reachable
+            </div>
+        {% endif %}
+        <hr>
     </div>
-
+    <br>
     <div class="navbar navbar-default navbar-fixed-bottom">
         <div class="container">
             {% if 'sessionname' in param['ctrl'] %}
                 <p class="navbar-text pull-left">{{ param['ctrl']['sessionname'] }} Logged in</p>
             {% else %}
-                <p class="navbar-text pull-left">You are not logged in</p>
+                <p class="navbar-text pull-left">No one logged in</p>
             {% endif %}
 
         </div>
     </div>
-
+    <script>
+        $(document).on("click", ".confirmdel", function(e) {
+        e.preventDefault();
+        bootbox.confirm("Are you sure you want to delete the user(s)?", function(result) {
+            if (result) {
+                $('#usersform').submit();
+                }
+            });
+        });
+    </script>
 </body>
-
+ 
 </html>
+
+

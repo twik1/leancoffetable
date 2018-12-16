@@ -402,6 +402,33 @@ def about():
     return render_template('about', param=param)
 
 
+@app.route('/users', methods=['GET', 'POST'])
+def users():
+    param = {'data': [], 'ctrl': {}}
+    update_session(param)
+    if not 'admin' in param['ctrl']:
+        param['ctrl']['errormsg'] = 'You need to be admin to manage users'
+        return render_template('error', param=param)
+    if request.method == 'POST':
+        for user, value in request.form.items():
+            shadow1 = restapi.deluser(user)
+        return redirect(url_for('users'))
+    else:
+        shadow1 = restapi.getusers()
+        if shadow1['result'] == 0:
+            param['ctrl']['errormsg'] = 'No contact with backend'
+            return render_template('error', param=param)
+        index = 0
+        for user in shadow1['data']:
+            shadow2 = restapi.getuser(user)
+            # if result differ from success go error
+            usr = { 'mail':shadow2['data'][0]['mail'], 'name':shadow2['data'][0]['name'],
+                    'user':shadow2['data'][0]['user'], 'index':index}
+            param['data'].append(usr)
+            index+=1
+        return render_template('users', param=param)
+
+
 @app.route('/setup', methods=['GET', 'POST'])
 def setup():
     global gcfg
