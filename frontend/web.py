@@ -9,6 +9,8 @@ from multiprocessing import Process, Queue
 import subprocess
 import time
 import sys
+import random
+import hashlist
 
 CONST_LCTVER = '0.9.0'
 
@@ -492,6 +494,7 @@ def backsetup():
 def start_frontend(queue, argd):
     global gqueue
     global gcfg
+    global hashlist
 
     gqueue = queue
     gcfg = config.Config('.lct', 'lctfrontend')
@@ -515,7 +518,11 @@ def start_frontend(queue, argd):
     if not gcfg.get_cfg('frontend', 'admin_password'):
        gcfg.set_cfg('frontend', 'admin_password', 'admin')
     backend_port = gcfg.get_cfg('frontend', 'backend_port')
+    if not gcfg.get_cfg('frontend', 'seed'):
+        gcfg.set_cfg('frontend', 'seed', str(random.randint(1,10001)))
+    seed = int(gcfg.get_cfg('frontend', 'seed'))
     restapi.setbaseurl(backend_host, backend_port)
+    hashlist = hashlist.Hashlist(seed)
 
     app.secret_key = 'super secret key'
     app.config['SESSION_TYPE'] = 'filesystem'
