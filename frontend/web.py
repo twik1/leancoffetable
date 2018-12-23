@@ -478,6 +478,7 @@ def setup():
                 param['ctrl']['db_status'] = 'fail'
         return render_template('setup', param=param)
 
+
 @app.route('/backendsetup', methods=['POST'])
 def backsetup():
     global gcfg
@@ -489,6 +490,17 @@ def backsetup():
             data[field] = value
         restapi.setconfig(data)
     return redirect(url_for('setup'))
+
+
+@app.route('/recover', methods=['GET', 'POST'])
+def recover():
+    param = {'data': [], 'ctrl': {}}
+    update_session(param)
+    if request.method == 'POST':
+        param['ctrl']['infomsg'] = 'If you have an account a recovery link has been sent to your email address'
+        return render_template('recover', param=param)
+    else:
+        return render_template('recover', param=param)
 
 
 def start_frontend(queue, argd):

@@ -51,11 +51,11 @@
     </nav>
 
     <div class="container-fluid">
-        <form class="form-horizontal" role="form" method="POST" action="/login">
+        <form class="form-horizontal" role="form" method="POST" action="/recover">
             <div class="row">
                 <div class="col-md-5"></div>
                 <div class="col-md-3">
-                    <h2>Please Login</h2>
+                    <h2>Recover Password</h2>
                     <br>
                 </div>
                 <div class="col-md-4"></div>
@@ -64,30 +64,18 @@
             <div class="row">
                 <div class="form-group has-danger">
                     <div class="col-md-3"></div>
-                    <label class="control-lable col-md-1" for="user"> Username</label>
+                    <label class="control-lable col-md-1" for="name">Email</label>
                     <div class="input-group col-md-3">
-                        <div class="input-group-addon" style="width: 2.6rem"><i class="fas fa-user"></i></div>
-                        <input type="text" name="user" class="form-control" id="user" placeholder="Username" required autofocus>
+                        <div class="input-group-addon" style="width: 2.6rem"><i class="fas fa-at"></i></div>
+                        <input type="email" name="email" class="form-control" id="email" placeholder="Email" required>
                     </div>
                 </div>
             </div>
 
-            <div class="row">
-                <div class="form-group">
-                    <div class="col-md-3"></div>
-                    <label class="control-lable col-md-1" for="password"> Password</label>
-                    <div class="input-group col-md-3">
-                        <div class="input-group-addon" style="width: 2.6rem"><i class="fas fa-key"></i></div>
-                        <input type="password" name="password" class="form-control" id="password" placeholder="Password" required>
-                    </div>
-                </div>
-            </div>
             <div class="row" style="padding-top: 1rem">
                 <div class="col-md-4"></div>
                 <div class="col-md-6">
-                    <button type="submit" class="btn btn-success"><i class="fas fa-sign-in"></i> Login</button>
-                    <a class="btn btn-link" href="/newuser">Register new user?</a>
-                    <a class="btn btn-link" href="/recover">Recover lost password?</a>
+                    <button type="submit" class="btn btn-success"><i class="fas fa-sign-in"></i> Send</button>
                 </div>
             </div>
         </form>
@@ -95,9 +83,9 @@
 
     <div class="container-fluid">
         <br>
-        {% if 'errormsg' in param['ctrl'] %}
-            <div class="alert alert-danger">
-                <strong><i class="fas fa-times"></i> </strong>{{ param['ctrl']['errormsg'] }}
+        {% if 'infomsg' in param['ctrl'] %}
+            <div class="alert alert-info">
+                <strong><i class="fas fa-exclamation"></i> </strong>{{ param['ctrl']['infomsg'] }}
             </div>
         {% endif %}
     </div>
