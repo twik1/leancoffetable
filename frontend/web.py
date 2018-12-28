@@ -11,6 +11,7 @@ import time
 import sys
 import random
 import hashlist
+import smtp
 
 CONST_LCTVER = '0.9.0'
 
@@ -70,6 +71,15 @@ def sortlist(list):
             lowest = list[0]['topicvotes']
             j = 0
     return newlist
+
+def find_user(mail):
+    shadow1 = restapi.getusers()
+    for user in shadow1['data']:
+        shadow2 = restapi.getuser(user)
+        if shadow2['data'][0]['mail'] == mail:
+            return user
+    return False
+
 
 @app.route('/index', methods=['GET'])
 @app.route('/', methods=['GET'])
@@ -435,6 +445,8 @@ def users():
 def setup():
     global gcfg
     global gqueue
+    global mail
+
     param = {'data': [], 'ctrl': {}}
     update_session(param)
     if not 'admin' in param['ctrl']:
@@ -451,6 +463,7 @@ def setup():
         if not listen_address == request.form['listen_address'] or not listen_port == request.form['listen_port']:
             gcfg.set_cfg('frontend', 'listen_address', request.form['listen_address'])
             gcfg.set_cfg('frontend', 'listen_port', request.form['listen_port'])
+            gcfg.set_cfg('frontend', 'base_url', request.form['base_url'])
             gqueue.put('restart')
         return redirect(url_for('setup'))
     else:
@@ -476,6 +489,18 @@ def setup():
                 param['ctrl']['db_status'] = 'ok'
             else:
                 param['ctrl']['db_status'] = 'fail'
+
+        config = mail.get_config()
+        if gcfg.get_cfg('frontend', 'base_url'):
+            config['LCT Base URL'] = {'base_url': gcfg.get_cfg('frontend', 'base_url')}
+        else:
+            config['LCT Base URL'] = {'base_url': ""}
+        param['mail'] = config
+        if mail.test_conn():
+            param['ctrl']['mail_status'] = 'fail'
+        else:
+            param['ctrl']['mail_status'] = 'ok'
+        param['ctrl']['base_url'] = gcfg.get_cfg('frontend', 'base_url')
         return render_template('setup', param=param)
 
 
@@ -492,15 +517,100 @@ def backsetup():
     return redirect(url_for('setup'))
 
 
+@app.route('/mailsetup', methods=['POST'])
+def mailsetup():
+    global gcfg
+    global mail
+    param = {'data': [], 'ctrl': {}}
+    data = {}
+    update_session(param)
+    if request.method == 'POST':
+        for field, value in request.form.items():
+            data[field] = value
+            if not value == "":
+                gcfg.set_cfg('frontend', field, value)
+        mail.set_min_config(data)
+
+    return redirect(url_for('setup'))
+
+
+# check lct_base_usr for exist and sanity
 @app.route('/recover', methods=['GET', 'POST'])
 def recover():
+    global hashlist
+    global mail
     param = {'data': [], 'ctrl': {}}
     update_session(param)
     if request.method == 'POST':
+        if not gcfg.get_cfg('frontend', 'base_url'):
+            param['ctrl']['errormsg'] = 'The base URL is not set, let your admin know!'
+            return render_template('error', param=param)
         param['ctrl']['infomsg'] = 'If you have an account a recovery link has been sent to your email address'
+        lct_url = gcfg.get_cfg('frontend', 'base_url')
+        mailto = request.form['email']
+        user = find_user(mailto)
+        if not user:
+            return render_template('recover', param=param)
+        hash = hashlist.create(mailto, user, 1)
+        mail.send(mailto, "LCT password reset",
+                  "Follow link to reset password for LCT: {}/reset?lnk={}".format(lct_url,hash))
         return render_template('recover', param=param)
     else:
         return render_template('recover', param=param)
+
+
+@app.route('/reset', methods=['GET', 'POST'])
+def reset():
+    global hashlist
+    param = {'data': [], 'ctrl': {}}
+    update_session(param)
+    if request.method == 'GET':
+        hash = request.args.get('lnk')
+        if hashlist.checkhash(hash):
+            param['ctrl']['hash'] = hash
+            return render_template('reset', param=param)
+        else:
+            param['ctrl']['errormsg'] = 'No active password reset'
+            return render_template('error', param=param)
+    else:
+        hash = request.form['hash']
+        if hashlist.checkhash(hash):
+            user = hashlist.checkhash(hash)
+            shadow1 = restapi.getuser(user)
+            newpassword = request.form['newpassword']
+            newpassword2 = request.form['newpassword2']
+            if len(newpassword) or len(newpassword2):
+                if not newpassword == newpassword2:
+                    param['ctrl']['errormsg'] = 'New Password and Repeat New Password doesnt match'
+                    param['ctrl']['hash'] = hash
+                    return render_template('reset', param=param)
+                password = pbkdf2_sha256.encrypt(newpassword, rounds=200000, salt_size=16)
+            else:
+                param['ctrl']['errormsg'] = 'You have to type in a new password'
+                param['ctrl']['hash'] = hash
+                return render_template('reset', param=param)
+            data = {'user': user, 'name': shadow1['data'][0]['name'], 'password': password, 'mail': shadow1['data'][0]['mail']}
+            shadow1 = restapi.updateuser(data)
+            param['ctrl']['okmsg'] = 'Password has been updated'
+            hashlist.removehash(hash)
+            return render_template('error', param=param)
+        else:
+            param['ctrl']['errormsg'] = 'No active password reset'
+            return render_template('error', param=param)
+
+
+def mail_setup():
+    global mail
+    mail = smtp.mailSMTP()
+    config = mail.get_config()
+    setconfig = {}
+    for mkey, dict in config.items():
+        for key, value in dict.items():
+            if gcfg.get_cfg('frontend', key):
+                setconfig[key] = gcfg.get_cfg('frontend', key)
+            else:
+                setconfig[key] = value
+    mail.set_min_config(setconfig)
 
 
 def start_frontend(queue, argd):
@@ -535,6 +645,8 @@ def start_frontend(queue, argd):
     seed = int(gcfg.get_cfg('frontend', 'seed'))
     restapi.setbaseurl(backend_host, backend_port)
     hashlist = hashlist.Hashlist(seed)
+
+    mail_setup()
 
     app.secret_key = 'super secret key'
     app.config['SESSION_TYPE'] = 'filesystem'
