@@ -652,7 +652,7 @@ def start_frontend(queue, argd):
     app.config['SESSION_TYPE'] = 'filesystem'
     sess.init_app(app)
 
-    serve(app, listen=gcfg.get_cfg('frontend', 'listen_address') + ':' + gcfg.get_cfg('frontend', 'listen_port'))
+    serve(app, listen=gcfg.get_cfg('frontend', 'listen_address') + ':' + gcfg.get_cfg('frontend', 'listen_port'),trusted_proxy="*")
 
 
 if __name__ == '__main__':
