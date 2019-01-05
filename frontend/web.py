@@ -13,7 +13,7 @@ import random
 import hashlist
 import smtp
 
-CONST_LCTVER = '0.9.0'
+CONST_LCTVER = '0.9.1'
 
 app = Flask(__name__)
 
