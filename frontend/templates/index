@@ -32,18 +32,18 @@
 
         <div class="collapse navbar-collapse" id="navbar-collapse-3">
           <ul class="nav navbar-nav navbar-right">
-            <li><a href="{{ url_for('index') }}">Home</a></li>
+            <li><a href="{{ url_for('.index') }}">Home</a></li>
             {% if param['ctrl']['loggedin'] == 'yes' %}
-            <li><a href="{{ url_for('logout') }}">Logout</a></li>
-            <li><a href="{{ url_for('eduser') }}">User</a></li>
+            <li><a href="{{ url_for('.logout') }}">Logout</a></li>
+            <li><a href="{{ url_for('.eduser') }}">User</a></li>
             {% else %}
-            <li><a href="{{ url_for('login') }}">Login</a></li>
+            <li><a href="{{ url_for('.login') }}">Login</a></li>
             {% endif %}
             {% if 'admin' in param['ctrl'] %}
-            <li><a href="{{ url_for('setup') }}">Setup</a></li>
-            <li><a href="{{ url_for('users') }}">Users</a></li>
+            <li><a href="{{ url_for('.setup') }}">Setup</a></li>
+            <li><a href="{{ url_for('.users') }}">Users</a></li>
             {% endif %}
-            <li><a href="{{ url_for('about') }}">About</a></li>
+            <li><a href="{{ url_for('.about') }}">About</a></li>
           </ul>
         </div>
 
@@ -52,9 +52,9 @@
 
     <div class="container-fluid" id="addbutton">
         {% if param['ctrl']['loggedin'] == 'yes' %}
-        <button type="button" class="btn btn-success pull-right" onclick="location.href='{{ url_for('newboard') }}';">Add new board</button>
+        <button type="button" class="btn btn-success pull-right" onclick="location.href='{{ url_for('.newboard') }}';">Add new board</button>
         {% else %}
-        <button type="button" class="btn btn-success pull-right disabled" disabled="disabled" onclick="location.href='{{ url_for('newboard') }}';">Add new board</button>
+        <button type="button" class="btn btn-success pull-right disabled" disabled="disabled" onclick="location.href='{{ url_for('.newboard') }}';">Add new board</button>
         {% endif %}
     </div>
 
@@ -64,7 +64,7 @@
         {% for board in param['data'] %}
 	        <div class="col-md-3 col-sm-4">
                 <div class="card">
-                    <a href="{{ url_for('board', boardid=board['boardid']) }}" id="nodec">
+                    <a href="{{ url_for('.board', boardid=board['boardid']) }}" id="nodec">
                         <div class="card-img-top" style="background-color:rgba(187, 120, 36, 0.1) " id="topimg">
                             <center><i class="fas fa-edit" style="color:#BB7824"></i></center>
                         </div>
@@ -84,7 +84,7 @@
                                     <td style="width: 5%;">
                                         {% if 'sessionname' in param['ctrl'] %}
                                             {% if param['ctrl']['sessionname'] == board['user'] or 'admin' in param['ctrl'] %}
-                                                <a href="#" class="btn confirmdel tooltips" data-id="{{ url_for('delboard', boardid=board['boardid']) }}" title="Delete">
+                                                <a href="#" class="btn confirmdel tooltips" data-id="{{ url_for('.delboard', boardid=board['boardid']) }}" title="Delete">
                                                     <span class="fas fa-trash-alt"></span>
                                                 </a>
                                             {% endif %}

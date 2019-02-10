@@ -32,18 +32,18 @@
 
         <div class="collapse navbar-collapse" id="navbar-collapse-3">
           <ul class="nav navbar-nav navbar-right">
-            <li><a href="{{ url_for('index') }}">Home</a></li>
+            <li><a href="{{ url_for('.index') }}">Home</a></li>
             {% if param['ctrl']['loggedin'] == 'yes' %}
-            <li><a href="{{ url_for('logout') }}">Logout</a></li>
-            <li><a href="{{ url_for('eduser') }}">User</a></li>
+            <li><a href="{{ url_for('.logout') }}">Logout</a></li>
+            <li><a href="{{ url_for('.eduser') }}">User</a></li>
             {% else %}
-            <li><a href="{{ url_for('login') }}">Login</a></li>
+            <li><a href="{{ url_for('.login') }}">Login</a></li>
             {% endif %}
             {% if 'admin' in param['ctrl'] %}
-            <li><a href="{{ url_for('setup') }}">Setup</a></li>
-            <li><a href="{{ url_for('users') }}">Users</a></li>
+            <li><a href="{{ url_for('.setup') }}">Setup</a></li>
+            <li><a href="{{ url_for('.users') }}">Users</a></li>
             {% endif %}
-            <li><a href="{{ url_for('about') }}">About</a></li>
+            <li><a href="{{ url_for('.about') }}">About</a></li>
           </ul>
         </div>
 

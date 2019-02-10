@@ -17,12 +17,12 @@
     <script src="http://rawgithub.com/makeusabrew/bootbox/master/bootbox.js"></script>
     <script>
         function newtopic(boardid) {
-            var url = '{{ url_for('newtopic', boardid='') }}';
+            var url = '{{ url_for('.newtopic', boardid='') }}';
             window.location.href=url+boardid.toString();
             }
 
         function votetopic(boardid, topicid) {
-            var url = '{{ url_for('newvote', boardid='B', topicid='T') }}';
+            var url = '{{ url_for('.newvote', boardid='B', topicid='T') }}';
             // window.location.href=url+topicid.toString();
             alert(url);
         }
@@ -39,24 +39,24 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <a class="navbar-brand" href="{{ url_for('index') }}">Lean Coffee Table</a>
+          <a class="navbar-brand" href="{{ url_for('.index') }}">Lean Coffee Table</a>
             <a class="navbar-brand italic"> - {{ param['ctrl']['boardname'] }}</a>
         </div>
 
         <div class="collapse navbar-collapse" id="navbar-collapse-3">
           <ul class="nav navbar-nav navbar-right">
-            <li><a href="{{ url_for('index') }}">Home</a></li>
+            <li><a href="{{ url_for('.index') }}">Home</a></li>
             {% if param['ctrl']['loggedin'] == 'yes' %}
-            <li><a href="{{ url_for('logout') }}">Logout</a></li>
-            <li><a href="{{ url_for('eduser') }}">User</a></li>
+            <li><a href="{{ url_for('.logout') }}">Logout</a></li>
+            <li><a href="{{ url_for('.eduser') }}">User</a></li>
             {% else %}
-            <li><a href="{{ url_for('login') }}">Login</a></li>
+            <li><a href="{{ url_for('.login') }}">Login</a></li>
             {% endif %}
             {% if 'admin' in param['ctrl'] %}
-            <li><a href="{{ url_for('setup') }}">Setup</a></li>
-            <li><a href="{{ url_for('users') }}">Users</a></li>
+            <li><a href="{{ url_for('.setup') }}">Setup</a></li>
+            <li><a href="{{ url_for('.users') }}">Users</a></li>
             {% endif %}
-            <li><a href="{{ url_for('about') }}">About</a></li>
+            <li><a href="{{ url_for('.about') }}">About</a></li>
           </ul>
         </div>
 
@@ -65,13 +65,13 @@
 
     <div class="container-fluid btn-toolbar" id="addbutton">
         {% if param['data'] |count > 1 %}
-        <button type="button" class="btn btn-info pull-right" onclick="location.href='{{ url_for('board', boardid=param['ctrl']['boardid'], sort='yes') }}';">Sort topics</button>
+        <button type="button" class="btn btn-info pull-right" onclick="location.href='{{ url_for('.board', boardid=param['ctrl']['boardid'], sort='yes') }}';">Sort topics</button>
         {% endif %}
 
         {% if param['ctrl']['loggedin'] == 'yes' %}
-        <button type="button" class="btn btn-success pull-right" onclick="location.href='{{ url_for('newtopic',boardid=param['ctrl']['boardid']) }}';">Add new topic</button>
+        <button type="button" class="btn btn-success pull-right" onclick="location.href='{{ url_for('.newtopic',boardid=param['ctrl']['boardid']) }}';">Add new topic</button>
         {% else %}
-        <button type="button" class="btn btn-success pull-right disabled" disabled="disabled" onclick="location.href='{{ url_for('newtopic',boardid=param['ctrl']['boardid']) }}';">Add new topic</button>
+        <button type="button" class="btn btn-success pull-right disabled" disabled="disabled" onclick="location.href='{{ url_for('.newtopic',boardid=param['ctrl']['boardid']) }}';">Add new topic</button>
         {% endif %}
     </div>
 
@@ -99,20 +99,20 @@
                                         {% if 'sessionname' in param['ctrl'] %}
                                             <td style="width: 5%;">
                                                 {% if param['ctrl']['sessionname'] == topic['user'] or 'admin' in param['ctrl'] %}
-                                                    <a href="#" class="btn confirmdel tooltips pull-left" data-id="{{ url_for('deltopic', boardid=topic['boardid'],topicid=topic['topicid']) }}" title="Delete">
+                                                    <a href="#" class="btn confirmdel tooltips pull-left" data-id="{{ url_for('.deltopic', boardid=topic['boardid'],topicid=topic['topicid']) }}" title="Delete">
                                                         <span class="fas fa-trash-alt"></span>
                                                     </a>
                                                 {% endif %}
                                             </td>
                                             <td class="text-right" style="width: 50%;">
                                                 {% if (param['ctrl']['myboardvotes'] != 0) and (topic['mytopicvotes'] != 0) %}
-                                                    <a href="#" class="btn tooltips" onclick="location.href='{{ url_for('delvote',boardid=topic['boardid'],topicid=topic['topicid'],voteid=0) }}';" title="Remove vote">
+                                                    <a href="#" class="btn tooltips" onclick="location.href='{{ url_for('.delvote',boardid=topic['boardid'],topicid=topic['topicid'],voteid=0) }}';" title="Remove vote">
                                                         <span class="fas fa-minus"></span>
                                                     </a>
                                                 {% endif %}
 
                                                 {% if (param['ctrl']['myboardvotes'] < param['ctrl']['votenum']) or (param['ctrl']['votenum'] == 0) %}
-                                                    <a href="#" class="btn tooltips" onclick="location.href='{{ url_for('newvote',boardid=topic['boardid'],topicid=topic['topicid']) }}';" title="Add vote">
+                                                    <a href="#" class="btn tooltips" onclick="location.href='{{ url_for('.newvote',boardid=topic['boardid'],topicid=topic['topicid']) }}';" title="Add vote">
                                                         <span class="fas fa-plus"></span>
                                                     </a>
                                                 {% endif %}

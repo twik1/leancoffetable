@@ -1,10 +1,9 @@
-from flask import Flask, render_template, request, redirect, url_for, session
+from flask import Flask, render_template, request, redirect, url_for, session, Blueprint
 import rest
 from flask_session import Session
 from passlib.hash import pbkdf2_sha256
 import argparse
-from waitress import serve
-import config
+#from waitress import serve
 from multiprocessing import Process, Queue
 import subprocess
 import time
@@ -12,34 +11,37 @@ import sys
 import random
 import hashlist
 import smtp
+sys.path.insert(0, '../backend')
+import config
 
 CONST_LCTVER = '0.9.1'
 
-app = Flask(__name__)
+#app = Flask(__name__)
 
-sess = Session()
-restapi = rest.CurlREST()
+#sess = Session()
+#restapi = rest.CurlREST()
 
+tapp = Blueprint('tapp', __name__)
 
-class Daemon:
-    def __init__(self, method):
-        self.q = Queue()
-        self.method = method
+#class Daemon:
+#    def __init__(self, method):
+#        self.q = Queue()
+#        self.method = method
 
-    def start(self, argsd):
-        self.p = Process(target=self.method, args=[self.q, argsd])
-        self.p.start()
-        while True:
-            if self.q.empty():  # sleep on queue?
-                time.sleep(1)
-            else:
-                msg = self.q.get()
-                break
-        self.p.terminate()
-
-        if msg == 'restart':
-            args = [sys.executable] + [sys.argv[0]]
-            subprocess.call(args)
+#    def start(self, argsd):
+#        self.p = Process(target=self.method, args=[self.q, argsd])
+#        self.p.start()
+#        while True:
+#            if self.q.empty():  # sleep on queue?
+#                time.sleep(1)
+#            else:
+#                msg = self.q.get()
+#                break
+#        self.p.terminate()
+#
+#        if msg == 'restart':
+#            args = [sys.executable] + [sys.argv[0]]
+#            subprocess.call(args)
 
 
 def update_session(param):
@@ -81,8 +83,8 @@ def find_user(mail):
     return False
 
 
-@app.route('/index', methods=['GET'])
-@app.route('/', methods=['GET'])
+@tapp.route('/index', methods=['GET'])
+@tapp.route('/', methods=['GET'])
 def index():
     param = {'data': [], 'ctrl': {}}
     update_session(param)
@@ -100,7 +102,7 @@ def index():
     return render_template('index', param=param)
 
 
-@app.route('/login', methods=['GET', 'POST'])
+@tapp.route('/login', methods=['GET', 'POST'])
 def login():
     param = {'data': [], 'ctrl': {}}
     update_session(param)
@@ -110,7 +112,7 @@ def login():
             if request.form['password'] == gcfg.get_cfg('frontend', 'admin_password'):
                 session['username'] = request.form['user']
                 param['ctrl']['loggedin'] = 'yes'
-                return redirect(url_for('index'))
+                return redirect(url_for('.index'))
             else:
                 param['ctrl']['errormsg'] = 'Faulty user or password'
                 return render_template('login', param=param)
@@ -125,7 +127,7 @@ def login():
             if pbkdf2_sha256.verify(request.form['password'], shadow1['data'][0]['password']):
                 session['username'] = request.form['user']
                 param['ctrl']['loggedin'] = 'yes'
-                return redirect(url_for('index'))
+                return redirect(url_for('.index'))
             else:
                 param['ctrl']['errormsg'] = 'Faulty user or password'
                 return render_template('login', param=param)
@@ -133,7 +135,7 @@ def login():
         return render_template('login', param=param)
 
 
-@app.route('/logout', methods=['GET'])
+@tapp.route('/logout', methods=['GET'])
 def logout():
     param = {'data': [], 'ctrl': {}}
     if 'username' in session.keys():
@@ -141,7 +143,7 @@ def logout():
     return render_template('login', param=param)
 
 
-@app.route('/newuser', methods=['GET', 'POST'])
+@tapp.route('/newuser', methods=['GET', 'POST'])
 def newuser():
     param = {'data': [], 'ctrl': {}}
     update_session(param)
@@ -162,12 +164,12 @@ def newuser():
             session['username'] = request.form['user']
             param['ctrl']['loggedin'] = 'yes'
             param['ctrl']['sessionname'] = session['username']
-            return redirect(url_for('index', param=param))
+            return redirect(url_for('.index', param=param))
     else:
         return render_template('newuser', param=param)
 
 
-@app.route('/eduser', methods=['GET', 'POST'])
+@tapp.route('/eduser', methods=['GET', 'POST'])
 def eduser():
     param = {'data': [], 'ctrl': {}}
     if not update_session(param):
@@ -238,7 +240,7 @@ def eduser():
                 return render_template('user', param=param)
 
 
-@app.route('/newboard', methods=['GET', 'POST'])
+@tapp.route('/newboard', methods=['GET', 'POST'])
 def newboard():
     param = {'data': [], 'ctrl': {}}
     if update_session(param):
@@ -257,7 +259,7 @@ def newboard():
                 param['ctrl']['errormsg'] = 'No contact with backend'
                 return render_template('error', param=param)
             else:
-                return redirect(url_for('index'))
+                return redirect(url_for('.index'))
         else:
             return render_template('newboard', param=param)
     else:
@@ -265,7 +267,7 @@ def newboard():
         return render_template('error', param=param)
 
 
-@app.route('/delboard/<boardid>')
+@tapp.route('/delboard/<boardid>')
 def delboard(boardid):
     param = {'data': [], 'ctrl': {}}
     if update_session(param):
@@ -288,13 +290,13 @@ def delboard(boardid):
                 param['ctrl']['errormsg'] = 'No such board'
                 return render_template('error', param=param)
             else:
-                return redirect(url_for('index'))
+                return redirect(url_for('.index'))
     else:
         param['ctrl']['errormsg'] = 'You need to be logged in to delete a board'
         return render_template('error', param=param)
 
 
-@app.route('/board/<boardid>', methods=['GET'])
+@tapp.route('/board/<boardid>', methods=['GET'])
 def board(boardid):
     param = {'data': [], 'ctrl': {}}
     index = 0 # topic index in data
@@ -337,7 +339,7 @@ def board(boardid):
     return render_template('board', param=param)
 
 
-@app.route('/boards/<boardid>',methods=['GET','POST'])
+@tapp.route('/boards/<boardid>',methods=['GET','POST'])
 def newtopic(boardid):
     # ToDo: figure out how boardid is treated?
     param = {'data': [], 'ctrl': {}}
@@ -350,7 +352,7 @@ def newtopic(boardid):
             shadow1 = restapi.addtopic(boardid, data)
             # ToDo: branch on correct values
             if not shadow1['result'] == 0:
-                return redirect(url_for('board', boardid=boardid))
+                return redirect(url_for('.board', boardid=boardid))
             else:
                 param['ctrl']['errormsg'] = 'No contact with backend'
                 return render_template('error', param=param)
@@ -362,7 +364,7 @@ def newtopic(boardid):
         return render_template('error', param=param)
 
 
-@app.route('/boards/<boardid>/deltopic/<topicid>', methods=['GET'])
+@tapp.route('/boards/<boardid>/deltopic/<topicid>', methods=['GET'])
 def deltopic(boardid, topicid):
     param = {'data': [], 'ctrl': {}}
     if update_session(param):
@@ -385,28 +387,28 @@ def deltopic(boardid, topicid):
                 param['ctrl']['errormsg'] = 'No such board'
                 return render_template('error', param=param)
             else:
-                return redirect(url_for('board', boardid=boardid))
+                return redirect(url_for('.board', boardid=boardid))
     else:
         param['ctrl']['errormsg'] = 'You need to be logged in to delete a topic'
         return render_template('error', param=param)
 
 
-@app.route('/boards/<boardid>/topics/<topicid>/votes', methods=['GET'])
+@tapp.route('/boards/<boardid>/topics/<topicid>/votes', methods=['GET'])
 def newvote(boardid, topicid):
     if 'username' in session.keys():
         data = {'user': session['username'], 'topicid': topicid}
         shadow1 = restapi.addvote(boardid, topicid, data)
-    return redirect(url_for('board', boardid=boardid))
+    return redirect(url_for('.board', boardid=boardid))
 
 
-@app.route('/boards/<boardid>/topics/<topicid>/votes/<voteid>', methods=['GET'])
+@tapp.route('/boards/<boardid>/topics/<topicid>/votes/<voteid>', methods=['GET'])
 def delvote(boardid, topicid, voteid):
     if 'username' in session.keys():
         ret = restapi.delvote(boardid, topicid, session['username'])
-    return redirect(url_for('board', boardid=boardid))
+    return redirect(url_for('.board', boardid=boardid))
 
 
-@app.route('/about', methods=['GET'])
+@tapp.route('/about', methods=['GET'])
 def about():
     param = {'data': [], 'ctrl': {}}
     update_session(param)
@@ -414,7 +416,7 @@ def about():
     return render_template('about', param=param)
 
 
-@app.route('/users', methods=['GET', 'POST'])
+@tapp.route('/users', methods=['GET', 'POST'])
 def users():
     param = {'data': [], 'ctrl': {}}
     update_session(param)
@@ -424,7 +426,7 @@ def users():
     if request.method == 'POST':
         for user, value in request.form.items():
             shadow1 = restapi.deluser(user)
-        return redirect(url_for('users'))
+        return redirect(url_for('.users'))
     else:
         shadow1 = restapi.getusers()
         if shadow1['result'] == 0:
@@ -441,7 +443,7 @@ def users():
         return render_template('users', param=param)
 
 
-@app.route('/setup', methods=['GET', 'POST'])
+@tapp.route('/setup', methods=['GET', 'POST'])
 def setup():
     global gcfg
     global gqueue
@@ -465,7 +467,7 @@ def setup():
             gcfg.set_cfg('frontend', 'listen_port', request.form['listen_port'])
             gcfg.set_cfg('frontend', 'base_url', request.form['base_url'])
             gqueue.put('restart')
-        return redirect(url_for('setup'))
+        return redirect(url_for('.setup'))
     else:
         # Check backend status
         # ToDo change to only test backend
@@ -504,7 +506,7 @@ def setup():
         return render_template('setup', param=param)
 
 
-@app.route('/backendsetup', methods=['POST'])
+@tapp.route('/backendsetup', methods=['POST'])
 def backsetup():
     global gcfg
     param = {'data': [], 'ctrl': {}}
@@ -514,10 +516,10 @@ def backsetup():
         for field, value in request.form.items():
             data[field] = value
         restapi.setconfig(data)
-    return redirect(url_for('setup'))
+    return redirect(url_for('.setup'))
 
 
-@app.route('/mailsetup', methods=['POST'])
+@tapp.route('/mailsetup', methods=['POST'])
 def mailsetup():
     global gcfg
     global mail
@@ -531,11 +533,11 @@ def mailsetup():
                 gcfg.set_cfg('frontend', field, value)
         mail.set_min_config(data)
 
-    return redirect(url_for('setup'))
+    return redirect(url_for('.setup'))
 
 
 # check lct_base_usr for exist and sanity
-@app.route('/recover', methods=['GET', 'POST'])
+@tapp.route('/recover', methods=['GET', 'POST'])
 def recover():
     global hashlist
     global mail
@@ -559,7 +561,7 @@ def recover():
         return render_template('recover', param=param)
 
 
-@app.route('/reset', methods=['GET', 'POST'])
+@tapp.route('/reset', methods=['GET', 'POST'])
 def reset():
     global hashlist
     param = {'data': [], 'ctrl': {}}
@@ -613,25 +615,58 @@ def mail_setup():
     mail.set_min_config(setconfig)
 
 
-def start_frontend(queue, argd):
-    global gqueue
-    global gcfg
-    global hashlist
+#def start_frontend(queue, argd):
+#    global gqueue
+#    global gcfg
+#    global hashlist
 
-    gqueue = queue
-    gcfg = config.Config('.lct', 'lctfrontend')
+#    gqueue = queue
+#    gcfg = config.Config('.lct', 'lctfrontend')
 
     # Frontend listen address and port is taken from start argument
     # If it's not given check config file otherwise use default
     # The rest could be configured through web interface
-    if 'addr' in argd.keys():
-        gcfg.set_cfg('frontend', 'listen_address', argd['addr'])
-    elif not gcfg.get_cfg('frontend', 'listen_address'):
-        gcfg.set_cfg('frontend', 'listen_address', "0.0.0.0")
-    if 'port' in argd.keys():
-        gcfg.set_cfg('frontend', 'listen_port', argd['port'])
-    elif not gcfg.get_cfg('frontend', 'listen_address'):
-        gcfg.set_cfg('frontend', 'listen_port', '5050')
+#    if 'addr' in argd.keys():
+#        gcfg.set_cfg('frontend', 'listen_address', argd['addr'])
+#    elif not gcfg.get_cfg('frontend', 'listen_address'):
+#        gcfg.set_cfg('frontend', 'listen_address', "0.0.0.0")
+#    if 'port' in argd.keys():
+#        gcfg.set_cfg('frontend', 'listen_port', argd['port'])
+#    elif not gcfg.get_cfg('frontend', 'listen_address'):
+#        gcfg.set_cfg('frontend', 'listen_port', '5050')
+
+#    if not gcfg.get_cfg('frontend', 'backend_host'):
+#        gcfg.set_cfg('frontend', 'backend_host', '0.0.0.0')
+#    backend_host = gcfg.get_cfg('frontend', 'backend_host')
+#    if not gcfg.get_cfg('frontend', 'backend_port'):
+#        gcfg.set_cfg('frontend', 'backend_port', '5000')
+#    if not gcfg.get_cfg('frontend', 'admin_password'):
+#       gcfg.set_cfg('frontend', 'admin_password', 'admin')
+#    backend_port = gcfg.get_cfg('frontend', 'backend_port')
+#    if not gcfg.get_cfg('frontend', 'seed'):
+#        gcfg.set_cfg('frontend', 'seed', str(random.randint(1,10001)))
+#    seed = int(gcfg.get_cfg('frontend', 'seed'))
+#    restapi.setbaseurl(backend_host, backend_port)
+#    hashlist = hashlist.Hashlist(seed)
+
+#    mail_setup()
+
+#    app.secret_key = 'super secret key'
+#    app.config['SESSION_TYPE'] = 'filesystem'
+#    sess.init_app(app)
+
+#    serve(app, listen=gcfg.get_cfg('frontend', 'listen_address') + ':' + gcfg.get_cfg('frontend', 'listen_port'),trusted_proxy="*")
+
+def initialize():
+    global gcfg
+    global hashlist
+    global restapi
+
+    app = Flask(__name__)
+    sess = Session()
+    restapi = rest.CurlREST()
+
+    gcfg = config.Config('.lct', 'lctfrontend')
     if not gcfg.get_cfg('frontend', 'backend_host'):
         gcfg.set_cfg('frontend', 'backend_host', '0.0.0.0')
     backend_host = gcfg.get_cfg('frontend', 'backend_host')
@@ -646,26 +681,26 @@ def start_frontend(queue, argd):
     restapi.setbaseurl(backend_host, backend_port)
     hashlist = hashlist.Hashlist(seed)
 
-    mail_setup()
-
     app.secret_key = 'super secret key'
     app.config['SESSION_TYPE'] = 'filesystem'
     sess.init_app(app)
 
-    serve(app, listen=gcfg.get_cfg('frontend', 'listen_address') + ':' + gcfg.get_cfg('frontend', 'listen_port'),trusted_proxy="*")
-
+    app.register_blueprint(tapp)
+    return app
 
 if __name__ == '__main__':
-    frontend_parameter = {}
-    parser = argparse.ArgumentParser(description='Lean Coffe Table frontend')
-    parser.add_argument('-l', '--listen_address', help='Frontend listen address', required=False)
-    parser.add_argument('-p', '--listen_port', help='Frontend listen port', required=False)
-    args = parser.parse_args()
+    app = initialize()
+    app.run()
+#    frontend_parameter = {}
+#    parser = argparse.ArgumentParser(description='Lean Coffe Table frontend')
+#    parser.add_argument('-l', '--listen_address', help='Frontend listen address', required=False)
+#    parser.add_argument('-p', '--listen_port', help='Frontend listen port', required=False)
+#    args = parser.parse_args()
 
-    if args.listen_address:
-        frontend_parameter['addr'] = args.listen_address
-    if args.listen_port:
-        frontend_parameter['port'] = args.listen_port
+#    if args.listen_address:
+#        frontend_parameter['addr'] = args.listen_address
+#    if args.listen_port:
+#        frontend_parameter['port'] = args.listen_port
 
-    daemon = Daemon(start_frontend)
-    daemon.start(frontend_parameter)
+#    daemon = Daemon(start_frontend)
+#    daemon.start(frontend_parameter)
