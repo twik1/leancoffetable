@@ -1,5 +1,6 @@
 #!flask/bin/python
 from flask import Flask, abort, request, jsonify, make_response
+from flask_restful import Resource, Api, reqparse, abort
 from multiprocessing import Process, Queue
 from waitress import serve
 import mysqldb
@@ -12,10 +13,10 @@ import subprocess
 import argparse
 
 
-LCTBVER = '0.0.1'
+LCTBVER = '0.2.1'
 
 app = Flask(__name__)
-
+api = Api(app)
 
 class Daemon:
     def __init__(self, method):
@@ -60,39 +61,129 @@ def gabort(msg, resp):
 
 
 ##################################################
+"""
+Fet a list of users, empty if no user exists.
+500 If no contact with the database
+"""
+class Users(Resource):
+    def get(self):
+        global dbuserlist
+        try:
+            dbconnect.conn()
+            dbuserlist = dbconnect.get_users()
+            dbconnect.disconn()
+        except:
+            abort (500, message="No contact with database")
+        return jsonify(dbuserlist)
 
-@app.route('/lct/api/v1.0/users', methods=['GET'])
-def get_users():
-    dbconnect.conn()
-    dbuserlist = dbconnect.get_users()
-    dbconnect.disconn()
-    return jsonify(dbuserlist)
+    def post(self):
+        parser = reqparse.RequestParser()
+        parser.add_argument('user', type=str, required=True, help='user id required')
+        parser.add_argument('name', type=str, required=True, help='name required')
+        parser.add_argument('password', type=str, required=True, help='password required')
+        parser.add_argument('mail', type=str, required=True, help='email required')
+        args = parser.parse_args(strict=True)
+
+        user = {
+            'user': args['user'],
+            'name': args['name'],
+            'password': args['password'],
+            'mail': args['mail']
+        }
+        # Check if user exists
+        try:
+            dbconnect.conn()
+            dbuser = dbconnect.get_user(user['user'])
+            dbconnect.disconn()
+        except:
+            abort(500, message="No contact with database")
+
+        if len(dbuser):
+            abort(404, message="User {} already exist!".format(user['user']))
+        # No such user, we have a go!
+        try:
+            dbconnect.conn()
+            dbconnect.add_user(user)
+            dbconnect.disconn()
+        except:
+            abort(500, message="No contact with database")
+        return {'StatusCode': '201', 'Message': 'User creation success'}
+
+class User(Resource):
+    def get(self, user):
+        try:
+            dbconnect.conn()
+            dbuser = dbconnect.get_user(user)
+            dbconnect.disconn()
+        except:
+            abort(500, message="No contact with database")
+
+        if not len(dbuser):
+            abort(404, message="No user {}".format(user))
+
+        return jsonify(dbuser)
+
+    def put(self, user):
+        parser = reqparse.RequestParser()
+        parser.add_argument('name', type=str, help='name required')
+        parser.add_argument('password', type=str, help='password required')
+        parser.add_argument('mail', type=str, help='email required')
+        args = parser.parse_args(strict=True)
+
+        newuser = {
+            'user': user,
+            'name': args['name'],
+            'password': args['password'],
+            'mail': args['mail']
+        }
+        # Check if user exists
+        try:
+            dbconnect.conn()
+            xuser = dbconnect.check_user(newuser['user'])
+            if xuser:
+                dbuser = dbconnect.get_user(newuser['user'])[0]
+            dbconnect.disconn()
+        except:
+            abort(500, message="No contact with database")
+
+        if not xuser:
+            abort(404, message="No user {}".format(user))
+        # User exists, we have a go!
+        # Update new values, fill in the old values where none.
+        for key,value in newuser.items():
+            if value == None:
+                newuser[key] = dbuser[key]
+
+        try:
+            dbconnect.conn()
+            dbconnect.add_user(newuser)
+            dbconnect.disconn()
+        except:
+            abort(500, message="No contact with database")
+        return {'StatusCode': '201', 'Message': 'User {} uppdated'.format(newuser['user'])}
+
+    def delete(self, user):
+        try:
+            dbconnect.conn()
+            dbuser = dbconnect.get_user(user)
+            dbconnect.disconn()
+        except:
+            abort(500, message="No contact with database")
+
+        if not len(dbuser):
+            abort(404, message="No user {}".format(user))
+        try:
+            dbconnect.conn()
+            dbconnect.del_user(user)
+            dbconnect.disconn()
+        except:
+            abort(500, message="No contact with database")
+        return {'StatusCode': '201', 'Message': 'User {} created'.format(user)}
 
 
-@app.route('/lct/api/v1.0/users', methods=['POST'])
-def add_user():
-    dbconnect.conn()
-    if not check_result(['user', 'password']):
-        gabort("Missing parameter", 404)
-    user = {
-        'user': request.json['user'],
-        'name': request.json.get('name', ""),
-        'password': request.json['password'],
-        'mail': request.json['mail']
-    }
-    dbconnect.add_user(user)
-    dbconnect.disconn()
-    return jsonify({'user': request.json['user']}), 201
+api.add_resource(Users, '/lct/api/v1.0/users')
+api.add_resource(User, '/lct/api/v1.0/users/<string:user>')
 
-
-@app.route('/lct/api/v1.0/users/<user>', methods=['GET'])
-def get_user(user):
-    dbconnect.conn()
-    dbuser = dbconnect.get_user(user)
-    if not len(dbuser):
-        gabort("No such user", 404)
-    dbconnect.disconn()
-    return jsonify(dbuser)
 
 
 @app.route('/lct/api/v1.0/users/<user>', methods=['PUT'])
