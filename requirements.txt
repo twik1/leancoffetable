@@ -23,6 +23,6 @@ PyYAML==3.13
 requests==2.20.0
 six==1.11.0
 tavern==0.2.5
-urllib3==1.24.1
+urllib3==1.26.5
 waitress==1.1.0
 Werkzeug==0.14.1
